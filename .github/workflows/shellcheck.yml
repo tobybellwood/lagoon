@@ -5,7 +5,7 @@ on:
     # The branches below must be a subset of the branches above
     branches: [ main ]
 
-name: 'Trigger: Push action'
+name: 'Shellcheck BASH scripts'
 
 jobs:
   shellcheck:
