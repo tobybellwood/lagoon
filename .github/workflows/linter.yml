@@ -40,3 +40,10 @@ jobs:
           VALIDATE_ALL_CODEBASE: true
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OUTPUT_DETAILS: detailed
+          OUTPUT_FORMAT: tap
+      - name: Upload Report as an artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: linter-report
+          path: "${{ github.workspace }}/super-linter.report/"
