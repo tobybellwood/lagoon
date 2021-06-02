@@ -1,26 +1,26 @@
 ---
 - include: gitlab/skip-deployment.yaml
   vars:
-    testname: "GITLAB - skip deployment"
-    node_version: 8
+    testname: "GITLAB {{ cluster_type|upper }} - skip deployment"
+    node_version: 10
     git_repo_name: gitlab.git
-    project: ci-gitlab
+    project: ci-gitlab-{{ cluster_type }}
     branch: skip
-    check_url: "http://node.{{ project | regex_replace('_', '-') }}.{{ branch | regex_replace('/', '-') }}.{{ lookup('env','OPENSHIFT_ROUTE_SUFFIX') }}"
+    check_url: "http://node.{{ project | regex_replace('_', '-') }}.{{ branch | regex_replace('/', '-') }}.{{ route_suffix }}"
 
 - include: gitlab/branch.yaml
   vars:
-    testname: "GITLAB - slash branch"
-    node_version: 8
+    testname: "GITLAB {{ cluster_type|upper }} - slash branch"
+    node_version: 10
     git_repo_name: gitlab.git
-    project: ci-gitlab
+    project: ci-gitlab-{{ cluster_type }}
     branch: gitlab/slash/branch
-    check_url: "http://node.{{ project | regex_replace('_', '-') }}.{{ branch | regex_replace('/', '-') }}.{{ lookup('env','OPENSHIFT_ROUTE_SUFFIX') }}"
+    check_url: "http://node.{{ project | regex_replace('_', '-') }}.{{ branch | regex_replace('/', '-') }}.{{ route_suffix }}"
 
 - include: gitlab/pullrequest.yaml
   vars:
-    testname: "GITLAB - PULLREQUEST"
-    node_version: 8
+    testname: "GITLAB {{ cluster_type|upper }} - PULLREQUEST"
+    node_version: 10
     git_repo_name: gitlab.git
-    project: ci-gitlab
-    check_url: "http://node.{{ project | regex_replace('_', '-') }}.pr-1.{{ lookup('env','OPENSHIFT_ROUTE_SUFFIX') }}"
+    project: ci-gitlab-{{ cluster_type }}
+    check_url: "http://node.{{ project | regex_replace('_', '-') }}.pr-1.{{ route_suffix }}"

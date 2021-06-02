@@ -1,30 +1,14 @@
-import Client from 'mariasql';
+import * as mariadb from 'mariadb';
+import { toNumber } from '../util/func';
+import { getConfigFromEnv } from '../util/config';
 
-import * as logger from '../logger';
-
-let client: Client.MariaClient;
-
-export const USE_SINGLETON = true;
-
-export const getSqlClient = (singleton: boolean = false) => {
-  if (client && singleton === true) {
-    return client;
-  }
-  const sqlClient = new Client({
-    host: 'api-db',
-    port: 3306,
-    user: 'api',
-    password: 'api',
-    db: 'infrastructure',
-  });
-
-  sqlClient.on('error', error => {
-    logger.error(error.message);
-  });
-  client = sqlClient;
-  return sqlClient;
+export const config = {
+  host: getConfigFromEnv('API_DB_HOST', 'api-db'),
+  port: toNumber(getConfigFromEnv('API_DB_PORT', '3306')),
+  user: getConfigFromEnv('API_DB_USER', 'api'),
+  password: getConfigFromEnv('API_DB_PASSWORD', 'api'),
+  database: getConfigFromEnv('API_DB_DATABASE', 'infrastructure'),
+  connectionLimit: toNumber(getConfigFromEnv('API_DB_CONN_LIMIT', '80'))
 };
 
-module.exports = {
-  getSqlClient,
-};
+export const sqlClientPool = mariadb.createPool(config);

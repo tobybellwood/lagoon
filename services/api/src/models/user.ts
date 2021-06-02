@@ -1,5 +1,6 @@
 import * as R from 'ramda';
 import pickNonNil from '../util/pickNonNil';
+import * as logger from '../logger';
 import UserRepresentation from 'keycloak-admin/lib/defs/userRepresentation';
 import { Group, isRoleSubgroup } from './group';
 
@@ -32,7 +33,7 @@ interface UserModel {
   getAllProjectsIdsForUser: (userInput: User) => Promise<number[]>;
   getUserRolesForProject: (
     userInput: User,
-    projectId: number,
+    projectId: number
   ) => Promise<string[]>;
   addUser: (userInput: User) => Promise<User>;
   updateUser: (userInput: UserEdit) => Promise<User>;
@@ -60,20 +61,25 @@ const attrCommentLens = R.compose(
   // @ts-ignore
   attrLens,
   commentLens,
-  R.lensPath([0]),
+  R.lensPath([0])
 );
 
-export const User = (clients): UserModel => {
-  const { keycloakAdminClient } = clients;
+export const User = (clients: {
+  keycloakAdminClient: any;
+  redisClient: any;
+  sqlClientPool: any;
+  esClient: any;
+}): UserModel => {
+  const { keycloakAdminClient, redisClient } = clients;
 
   const fetchGitlabId = async (user: User): Promise<string> => {
     const identities = await keycloakAdminClient.users.listFederatedIdentities({
-      id: user.id,
+      id: user.id
     });
 
     const gitlabIdentity = R.find(
       R.propEq('identityProvider', 'gitlab'),
-      identities,
+      identities
     );
 
     // @ts-ignore
@@ -81,7 +87,7 @@ export const User = (clients): UserModel => {
   };
 
   const transformKeycloakUsers = async (
-    keycloakUsers: UserRepresentation[],
+    keycloakUsers: UserRepresentation[]
   ): Promise<User[]> => {
     // Map from keycloak object to user object
     const users = keycloakUsers.map(
@@ -89,8 +95,8 @@ export const User = (clients): UserModel => {
         // @ts-ignore
         R.pipe(
           R.pick(['id', 'email', 'username', 'firstName', 'lastName']),
-          R.set(commentLens, R.view(attrCommentLens, keycloakUser)),
-        )(keycloakUser),
+          R.set(commentLens, R.view(attrCommentLens, keycloakUser))
+        )(keycloakUser)
     );
 
     let usersWithGitlabIdFetch = [];
@@ -98,7 +104,7 @@ export const User = (clients): UserModel => {
     for (const user of users) {
       usersWithGitlabIdFetch.push({
         ...user,
-        gitlabId: await fetchGitlabId(user),
+        gitlabId: await fetchGitlabId(user)
       });
     }
 
@@ -107,7 +113,7 @@ export const User = (clients): UserModel => {
 
   const linkUserToGitlab = async (
     user: User,
-    gitlabUserId: string,
+    gitlabUserId: string
   ): Promise<void> => {
     try {
       // Add Gitlab Federated Identity to User
@@ -117,12 +123,12 @@ export const User = (clients): UserModel => {
         federatedIdentity: {
           identityProvider: 'gitlab',
           userId: gitlabUserId,
-          userName: gitlabUserId, // we don't map the username, instead just use the UID again
-        },
+          userName: gitlabUserId // we don't map the username, instead just use the UID again
+        }
       });
     } catch (err) {
       throw new Error(
-        `Error linking user "${user.email}" to Gitlab Federated Identity: ${err}`,
+        `Error linking user "${user.email}" to Gitlab Federated Identity: ${err}`
       );
     }
   };
@@ -132,16 +138,14 @@ export const User = (clients): UserModel => {
       // Remove Gitlab Federated Identity from User
       await keycloakAdminClient.users.delFromFederatedIdentity({
         id: user.id,
-        federatedIdentityId: 'gitlab',
+        federatedIdentityId: 'gitlab'
       });
     } catch (err) {
       if (err.response.status && err.response.status === 404) {
         // No-op
       } else {
         throw new Error(
-          `Error unlinking user "${
-            user.email
-          }" from Gitlab Federated Identity: ${err}`,
+          `Error unlinking user "${user.email}" from Gitlab Federated Identity: ${err}`
         );
       }
     }
@@ -149,7 +153,7 @@ export const User = (clients): UserModel => {
 
   const loadUserById = async (id: string): Promise<User> => {
     const keycloakUser = await keycloakAdminClient.users.findOne({
-      id,
+      id
     });
 
     if (R.isNil(keycloakUser)) {
@@ -163,7 +167,7 @@ export const User = (clients): UserModel => {
 
   const loadUserByUsername = async (username: string): Promise<User> => {
     const keycloakUsers = await keycloakAdminClient.users.find({
-      username,
+      username
     });
 
     if (R.isEmpty(keycloakUsers)) {
@@ -197,7 +201,7 @@ export const User = (clients): UserModel => {
 
   const loadAllUsers = async (): Promise<User[]> => {
     const keycloakUsers = await keycloakAdminClient.users.find({
-      max: -1,
+      max: -1
     });
 
     const users = await transformKeycloakUsers(keycloakUsers);
@@ -206,11 +210,11 @@ export const User = (clients): UserModel => {
   };
 
   const getAllGroupsForUser = async (userInput: User): Promise<Group[]> => {
-    const GroupModel = Group({ keycloakAdminClient });
+    const GroupModel = Group(clients);
     let groups = [];
 
     const roleSubgroups = await keycloakAdminClient.users.listGroups({
-      id: userInput.id,
+      id: userInput.id
     });
 
     for (const roleSubgroup of roleSubgroups) {
@@ -220,23 +224,27 @@ export const User = (clients): UserModel => {
       }
 
       const roleSubgroupParent = await GroupModel.loadParentGroup(
-        fullRoleSubgroup,
+        fullRoleSubgroup
       );
 
       groups.push(roleSubgroupParent);
     }
 
     return groups;
-  }
+  };
 
-  const getAllProjectsIdsForUser = async (userInput: User): Promise<number[]> => {
-    const GroupModel = Group({ keycloakAdminClient });
+  const getAllProjectsIdsForUser = async (
+    userInput: User
+  ): Promise<number[]> => {
+    const GroupModel = Group(clients);
     let projects = [];
 
     const userGroups = await getAllGroupsForUser(userInput);
 
     for (const group of userGroups) {
-      const projectIds = await GroupModel.getProjectsFromGroupAndSubgroups(group);
+      const projectIds = await GroupModel.getProjectsFromGroupAndSubgroups(
+        group
+      );
       projects = [...projects, ...projectIds];
     }
 
@@ -245,22 +253,24 @@ export const User = (clients): UserModel => {
 
   const getUserRolesForProject = async (
     userInput: User,
-    projectId: number,
+    projectId: number
   ): Promise<string[]> => {
-    const GroupModel = Group({ keycloakAdminClient });
+    const GroupModel = Group(clients);
 
     const userGroups = await getAllGroupsForUser(userInput);
 
     let roles = [];
     for (const group of userGroups) {
-      const projectIds = await GroupModel.getProjectsFromGroupAndSubgroups(group);
+      const projectIds = await GroupModel.getProjectsFromGroupAndSubgroups(
+        group
+      );
 
       if (projectIds.includes(projectId)) {
         const groupRoles = R.pipe(
           R.filter(membership =>
-            R.pathEq(['user', 'id'], userInput.id, membership),
+            R.pathEq(['user', 'id'], userInput.id, membership)
           ),
-          R.pluck('role'),
+          R.pluck('role')
         )(group.members);
 
         roles = [...roles, ...groupRoles];
@@ -274,16 +284,19 @@ export const User = (clients): UserModel => {
     let response: { id: string };
     try {
       response = await keycloakAdminClient.users.create({
-        ...pickNonNil(['email', 'username', 'firstName', 'lastName'], userInput),
+        ...pickNonNil(
+          ['email', 'username', 'firstName', 'lastName'],
+          userInput
+        ),
         enabled: true,
         attributes: {
-          comment: [R.defaultTo('', R.prop('comment', userInput))],
-        },
+          comment: [R.defaultTo('', R.prop('comment', userInput))]
+        }
       });
     } catch (err) {
       if (err.response.status && err.response.status === 409) {
         throw new UsernameExistsError(
-          `Username ${R.prop('username', userInput)} exists`,
+          `Username ${R.prop('username', userInput)} exists`
         );
       } else {
         throw new Error(`Error creating Keycloak user: ${err.message}`);
@@ -299,7 +312,7 @@ export const User = (clients): UserModel => {
 
     return {
       ...user,
-      gitlabId: R.prop('gitlabId', userInput),
+      gitlabId: R.prop('gitlabId', userInput)
     };
   };
 
@@ -307,17 +320,17 @@ export const User = (clients): UserModel => {
     try {
       await keycloakAdminClient.users.update(
         {
-          id: userInput.id,
+          id: userInput.id
         },
         {
           ...pickNonNil(
             ['email', 'username', 'firstName', 'lastName'],
-            userInput,
+            userInput
           ),
           attributes: {
-            comment: [R.defaultTo('', R.prop('comment', userInput))],
-          },
-        },
+            comment: [R.defaultTo('', R.prop('comment', userInput))]
+          }
+        }
       );
     } catch (err) {
       if (err.response.status && err.response.status === 404) {
@@ -337,7 +350,7 @@ export const User = (clients): UserModel => {
 
     return {
       ...user,
-      gitlabId: R.prop('gitlabId', userInput),
+      gitlabId: R.prop('gitlabId', userInput)
     };
   };
 
@@ -351,6 +364,11 @@ export const User = (clients): UserModel => {
         throw new Error(`Error deleting user ${id}: ${err}`);
       }
     }
+    try {
+      await redisClient.deleteRedisUserCache(id);
+    } catch (err) {
+      logger.error(`Error deleting user cache ${id}: ${err}`);
+    }
   };
 
   return {
@@ -363,6 +381,6 @@ export const User = (clients): UserModel => {
     getUserRolesForProject,
     addUser,
     updateUser,
-    deleteUser,
-  }
+    deleteUser
+  };
 };

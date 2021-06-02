@@ -1,8 +1,8 @@
-// @flow
-
-const { initSendToLagoonLogs } = require('@lagoon/commons/src/logs');
-const { initSendToLagoonTasks } = require('@lagoon/commons/src/tasks');
+require('newrelic');
+const { initSendToLagoonLogs } = require('@lagoon/commons/dist/logs');
+const { initSendToLagoonTasks } = require('@lagoon/commons/dist/tasks');
 const waitForKeycloak = require('./util/waitForKeycloak');
+const { envHasConfig } = require('./util/config');
 const logger = require('./logger');
 const createServer = require('./server');
 
@@ -10,20 +10,19 @@ initSendToLagoonLogs();
 initSendToLagoonTasks();
 
 (async () => {
-  const { JWTSECRET, JWTAUDIENCE } = process.env;
 
   await waitForKeycloak();
 
   logger.debug('Starting to boot the application.');
 
   try {
-    if (JWTSECRET == null) {
+    if (!envHasConfig('JWTSECRET')) {
       throw new Error(
         'Required environment variable JWTSECRET is undefined or null!',
       );
     }
 
-    if (JWTAUDIENCE == null) {
+    if (!envHasConfig('JWTAUDIENCE')) {
       throw new Error(
         'Required environment variable JWTAUDIENCE is undefined or null!',
       );

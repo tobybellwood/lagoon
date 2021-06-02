@@ -1,7 +1,34 @@
-// @flow
-
 const GraphQLDate = require('graphql-iso-date');
 const GraphQLJSON = require('graphql-type-json');
+
+const {
+  getAllProblems,
+  getProblemsByEnvironmentId,
+  addProblem,
+  deleteProblem,
+  deleteProblemsFromSource,
+  addProblemsFromSource,
+  getProblemSources,
+  getProblemHarborScanMatches,
+  addProblemHarborScanMatch,
+  deleteProblemHarborScanMatch,
+} = require('./resources/problem/resolvers');
+
+const {
+  getFactsByEnvironmentId,
+  addFact,
+  addFacts,
+  deleteFact,
+  deleteFactsFromSource,
+} = require('./resources/fact/resolvers');
+
+const {
+  SeverityScoreType
+} = require('./resources/problem/types');
+
+const {
+  getLagoonVersion,
+} = require('./resources/lagoon/resolvers');
 
 const {
   getDeploymentsByEnvironmentId,
@@ -14,12 +41,15 @@ const {
   deployEnvironmentBranch,
   deployEnvironmentPullrequest,
   deployEnvironmentPromote,
+  switchActiveStandby,
   deploymentSubscriber,
+  getDeploymentUrl
 } = require('./resources/deployment/resolvers');
 
 const {
   getTasksByEnvironmentId,
   getTaskByRemoteId,
+  getTaskById,
   addTask,
   deleteTask,
   updateTask,
@@ -29,6 +59,7 @@ const {
   taskDrushCron,
   taskDrushSqlSync,
   taskDrushRsyncFiles,
+  taskDrushUserLogin,
   taskSubscriber,
 } = require('./resources/task/resolvers');
 
@@ -42,7 +73,9 @@ const {
   addOrUpdateEnvironment,
   addOrUpdateEnvironmentStorage,
   getEnvironmentByName,
+  getEnvironmentById,
   getEnvironmentByOpenshiftProjectName,
+  getEnvironmentByKubernetesNamespaceName,
   getEnvironmentHoursMonthByEnvironmentId,
   getEnvironmentStorageByEnvironmentId,
   getEnvironmentStorageMonthByEnvironmentId,
@@ -58,6 +91,7 @@ const {
   getAllEnvironments,
   deleteAllEnvironments,
   userCanSshToEnvironment,
+  getEnvironmentUrl
 } = require('./resources/environment/resolvers');
 
 const {
@@ -98,9 +132,13 @@ const {
   getProjectByName,
   getProjectByGitUrl,
   getProjectByEnvironmentId,
+  getProjectsByMetadata,
   getAllProjects,
   updateProject,
   deleteAllProjects,
+  getProjectUrl,
+  updateProjectMetadata,
+  removeProjectMetadataByKey
 } = require('./resources/project/resolvers');
 
 const {
@@ -114,6 +152,7 @@ const {
 } = require('./resources/sshKey/resolvers');
 
 const {
+  getMe,
   getUserBySshKey,
   addUser,
   updateUser,
@@ -146,6 +185,15 @@ const {
 } = require('./resources/group/resolvers');
 
 const {
+  addBillingModifier,
+  updateBillingModifier,
+  deleteBillingModifier,
+  deleteAllBillingModifiersByBillingGroup,
+  getBillingModifiers,
+  getAllModifiersByGroupId
+} = require('./resources/billing/resolvers');
+
+const {
   addBackup,
   getBackupsByEnvironmentId,
   deleteBackup,
@@ -163,13 +211,7 @@ const {
   deleteEnvVariable,
 } = require('./resources/env-variables/resolvers');
 
-/* ::
-
-import type {ResolversObj} from './resources';
-
-*/
-
-const resolvers /* : { [string]: ResolversObj | typeof GraphQLDate } */ = {
+const resolvers = {
   GroupRole: {
     GUEST: 'guest',
     REPORTER: 'reporter',
@@ -177,9 +219,67 @@ const resolvers /* : { [string]: ResolversObj | typeof GraphQLDate } */ = {
     MAINTAINER: 'maintainer',
     OWNER: 'owner',
   },
+  ProjectOrderType: {
+    NAME: 'name',
+    CREATED: 'created',
+  },
+  EnvOrderType: {
+    NAME: 'name',
+    UPDATED: 'updated',
+  },
+  DeployType: {
+    BRANCH: 'branch',
+    PULLREQUEST: 'pullrequest',
+    PROMOTE: 'promote',
+  },
+  EnvType: {
+    PRODUCTION: 'production',
+    DEVELOPMENT: 'development',
+  },
+  EnvVariableType: {
+    PROJECT: 'project',
+    ENVIRONMENT: 'environment',
+  },
+  EnvVariableScope: {
+    BUILD: 'build',
+    RUNTIME: 'runtime',
+    GLOBAL: 'global',
+    CONTAINER_REGISTRY: 'container_registry',
+    INTERNAL_CONTAINER_REGISTRY: 'internal_container_registry',
+  },
+  RestoreStatusType: {
+    PENDING: 'pending',
+    SUCCESSFUL: 'successful',
+    FAILED: 'failed',
+  },
+  DeploymentStatusType: {
+    NEW: 'new',
+    PENDING: 'pending',
+    RUNNING: 'running',
+    CANCELLED: 'cancelled',
+    ERROR: 'error',
+    FAILED: 'failed',
+    COMPLETE: 'complete',
+  },
+  NotificationType: {
+    SLACK: 'slack',
+    ROCKETCHAT: 'rocketchat',
+    MICROSOFTTEAMS: 'microsoftteams',
+    EMAIL: 'email',
+  },
+  NotificationContentType: {
+    DEPLOYMENT: 'deployment',
+    PROBLEM: 'problem',
+  },
+  TaskStatusType: {
+    ACTIVE: 'active',
+    SUCCEEDED: 'succeeded',
+    FAILED: 'failed',
+  },
   Project: {
     notifications: getNotificationsByProjectId,
     openshift: getOpenshiftByProjectId,
+    kubernetes: getOpenshiftByProjectId,
     environments: getEnvironmentsByProjectId,
     envVariables: getEnvVarsByProjectId,
     groups: getGroupsByProjectId,
@@ -199,6 +299,7 @@ const resolvers /* : { [string]: ResolversObj | typeof GraphQLDate } */ = {
   },
   BillingGroup: {
     projects: getAllProjectsByGroupId,
+    modifiers: getAllModifiersByGroupId,
   },
   Environment: {
     project: getProjectByEnvironmentId,
@@ -211,9 +312,12 @@ const resolvers /* : { [string]: ResolversObj | typeof GraphQLDate } */ = {
     backups: getBackupsByEnvironmentId,
     envVariables: getEnvVarsByEnvironmentId,
     services: getEnvironmentServicesByEnvironmentId,
+    problems: getProblemsByEnvironmentId,
+    facts: getFactsByEnvironmentId,
   },
   Deployment: {
     environment: getEnvironmentByDeploymentId,
+    uiLink: getDeploymentUrl,
   },
   Task: {
     environment: getEnvironmentByTaskId,
@@ -221,7 +325,6 @@ const resolvers /* : { [string]: ResolversObj | typeof GraphQLDate } */ = {
   },
   Notification: {
     __resolveType(obj) {
-      // $FlowFixMe
       switch (obj.type) {
         case 'slack':
           return 'NotificationSlack';
@@ -245,24 +348,44 @@ const resolvers /* : { [string]: ResolversObj | typeof GraphQLDate } */ = {
     environment: getEnvironmentByBackupId,
   },
   Query: {
+    me: getMe,
+    lagoonVersion: getLagoonVersion,
     userBySshKey: getUserBySshKey,
     projectByGitUrl: getProjectByGitUrl,
     projectByName: getProjectByName,
     groupByName: getGroupByName,
+    problemSources: getProblemSources,
     environmentByName: getEnvironmentByName,
+    environmentById: getEnvironmentById,
     environmentByOpenshiftProjectName: getEnvironmentByOpenshiftProjectName,
+    environmentByKubernetesNamespaceName: getEnvironmentByKubernetesNamespaceName,
     userCanSshToEnvironment,
     deploymentByRemoteId: getDeploymentByRemoteId,
     taskByRemoteId: getTaskByRemoteId,
+    taskById: getTaskById,
     allProjects: getAllProjects,
     allOpenshifts: getAllOpenshifts,
+    allKubernetes: getAllOpenshifts,
     allEnvironments: getAllEnvironments,
+    allProblems: getAllProblems,
     allGroups: getAllGroups,
     allProjectsInGroup: getAllProjectsInGroup,
     billingGroupCost: getBillingGroupCost,
     allBillingGroupsCost: getAllBillingGroupsCost,
+    allBillingModifiers: getBillingModifiers,
+    allProblemHarborScanMatchers: getProblemHarborScanMatches,
+    projectsByMetadata: getProjectsByMetadata
   },
   Mutation: {
+    addProblem,
+    addProblemHarborScanMatch,
+    deleteProblem,
+    deleteProblemsFromSource,
+    deleteProblemHarborScanMatch,
+    addFact,
+    addFacts,
+    deleteFact,
+    deleteFactsFromSource,
     addOrUpdateEnvironment,
     updateEnvironment,
     deleteEnvironment,
@@ -291,10 +414,16 @@ const resolvers /* : { [string]: ResolversObj | typeof GraphQLDate } */ = {
     updateOpenshift,
     deleteOpenshift,
     deleteAllOpenshifts,
+    addKubernetes: addOpenshift,
+    updateKubernetes: updateOpenshift,
+    deleteKubernetes: deleteOpenshift,
+    deleteAllKubernetes: deleteAllOpenshifts,
     addProject,
     updateProject,
     deleteProject,
     deleteAllProjects,
+    updateProjectMetadata,
+    removeProjectMetadataByKey,
     addSshKey,
     updateSshKey,
     deleteSshKey,
@@ -323,6 +452,7 @@ const resolvers /* : { [string]: ResolversObj | typeof GraphQLDate } */ = {
     taskDrushCron,
     taskDrushSqlSync,
     taskDrushRsyncFiles,
+    taskDrushUserLogin,
     deleteTask,
     updateTask,
     setEnvironmentServices,
@@ -332,6 +462,7 @@ const resolvers /* : { [string]: ResolversObj | typeof GraphQLDate } */ = {
     deployEnvironmentBranch,
     deployEnvironmentPullrequest,
     deployEnvironmentPromote,
+    switchActiveStandby,
     addGroup,
     addBillingGroup,
     updateBillingGroup,
@@ -346,6 +477,10 @@ const resolvers /* : { [string]: ResolversObj | typeof GraphQLDate } */ = {
     removeUserFromGroup,
     addGroupsToProject,
     removeGroupsFromProject,
+    addBillingModifier,
+    updateBillingModifier,
+    deleteBillingModifier,
+    deleteAllBillingModifiersByBillingGroup,
   },
   Subscription: {
     backupChanged: backupSubscriber,
@@ -354,6 +489,7 @@ const resolvers /* : { [string]: ResolversObj | typeof GraphQLDate } */ = {
   },
   Date: GraphQLDate,
   JSON: GraphQLJSON,
+  SeverityScore: SeverityScoreType,
 };
 
 module.exports = resolvers;

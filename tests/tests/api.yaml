@@ -6,17 +6,17 @@
 
 - include: api/deploy-pullrequest.yaml
   vars:
-    testname: "API - deploy pullrequest"
-    node_version: 8
+    testname: "API {{ cluster_type|upper }} - deploy pullrequest"
+    node_version: 10
     git_repo_name: api.git
-    project: ci-api
-    check_url: "http://node.{{ project | regex_replace('_', '-') }}.pr-1.{{ lookup('env','OPENSHIFT_ROUTE_SUFFIX') }}"
+    project: ci-api-{{ cluster_type }}
+    check_url: "http://node.{{ project | regex_replace('_', '-') }}.pr-1.{{ route_suffix }}"
 
 - include: api/deploy-branch.yaml
   vars:
-    testname: "API - deploy regular branch"
-    node_version: 8
+    testname: "API {{ cluster_type|upper }} - deploy regular branch"
+    node_version: 10
     git_repo_name: api.git
-    project: ci-api
+    project: ci-api-{{ cluster_type }}
     branch: api/slash/branch
-    check_url: "http://node.{{ project | regex_replace('_', '-') }}.{{ branch | regex_replace('/', '-') }}.{{ lookup('env','OPENSHIFT_ROUTE_SUFFIX') }}"
+    check_url: "http://node.{{ project | regex_replace('_', '-') }}.{{ branch | regex_replace('/', '-') }}.{{ route_suffix }}"

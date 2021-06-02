@@ -43,6 +43,9 @@ parameters:
   - name: ENVIRONMENT_TYPE
     description: production level of this environment
     value: 'production'
+  - name: CONFIG_MAP_SHA
+    description: SHA sum of the configmap
+    value: ''
 objects:
   - apiVersion: v1
     kind: DeploymentConfig
@@ -66,6 +69,10 @@ objects:
             service: ${SERVICE_NAME}
             branch: ${SAFE_BRANCH}
             project: ${SAFE_PROJECT}
+          annotations:
+            appuio.ch/backupCommand: /bin/sh -c "/bin/busybox tar -cf - -C /var/cache/varnish ."
+            appuio.ch/fileExtension: .${SERVICE_NAME}.tar
+            lagoon.sh/configMapSha: ${CONFIG_MAP_SHA}
         spec:
           tolerations:
             - effect: NoSchedule

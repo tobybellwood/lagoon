@@ -1,6 +1,10 @@
-ARG IMAGE_REPO
-FROM ${IMAGE_REPO:-lagoon}/commons as commons
-FROM ubuntu:latest
+ARG UPSTREAM_REPO
+ARG UPSTREAM_TAG
+FROM ${UPSTREAM_REPO:-uselagoon}/commons:${UPSTREAM_TAG:-latest} as commons
+FROM ubuntu:18.04
+
+ARG LAGOON_VERSION
+ENV LAGOON_VERSION=$LAGOON_VERSION
 
 LABEL maintainer="amazee.io"
 
@@ -21,14 +25,14 @@ ENV TMPDIR=/tmp \
     BASH_ENV=/home/.bashrc
 
 ENV LAGOON=ssh \
-    OC_VERSION=v3.6.0 \
-    OC_HASH=c4dd4cf \
-		OC_SHA256=ecb0f52560ac766331052a0052b1de646011247f637c15063f4d74432e1ce389
+    OC_VERSION=v3.11.0 \
+    OC_HASH=0cbc58b \
+    OC_SHA256=4b0f07428ba854174c58d2e38287e5402964c9a9355f6c359d1242efd0990da3
 
 COPY services/ssh/libnss-mysql-1.5.tar.gz /tmp/libnss-mysql-1.5.tar.gz
 
 RUN apt-get update \
-    && apt-get install -y curl build-essential libmysqlclient-dev ssh curl npm vim jq \
+    && apt-get install -y curl build-essential libmysqlclient-dev ssh curl vim jq python3-jwt \
     && ln -s /usr/lib/x86_64-linux-gnu/libmysqlclient.so /usr/lib/libmysqlclient.so \
     && mkdir /tmp/libnss-mysql \
     && tar -xzf /tmp/libnss-mysql-1.5.tar.gz -C /tmp/libnss-mysql --strip-components=1 \
@@ -52,10 +56,6 @@ RUN curl -L https://github.com/krallin/tini/releases/download/v0.18.0/tini -o /s
 # Reproduce behavior of Alpine: Run Bash as sh
 RUN rm -f /bin/sh && ln -s /bin/bash /bin/sh
 
-# Needed for jwt generation
-RUN npm config set unsafe-perm true \
-    && npm -g install jwtgen
-
 COPY services/ssh/etc/ /etc/
 COPY services/ssh/home/ /home/
 
@@ -65,7 +65,8 @@ RUN fix-permissions /home/grant.sh
 
 RUN fix-permissions /etc/ssh/ && \
     fix-permissions /run/ && \
-    fix-permissions /etc/libnss-mysql.cfg
+    fix-permissions /etc/libnss-mysql.cfg && \
+    fix-permissions /etc/libnss-mysql-root.cfg
 
 RUN mkdir -p /var/run/sshd && chmod 700 /var/run/sshd
 
@@ -77,7 +78,7 @@ COPY services/ssh/authorize.sh /authorize.sh
 RUN chmod 755 /authorize.sh
 
 # create_60_sec_jwt to create a JWT Admin Token which is valid for 60 secs
-COPY services/ssh/create_60_sec_jwt.sh /create_60_sec_jwt.sh
+COPY services/ssh/create_60_sec_jwt.py /create_60_sec_jwt.py
 
 # Create /authorize.env file and give api right to write it, it will be filled
 # within docker-entrypoint with all environment variables and then sourced

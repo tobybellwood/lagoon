@@ -1,5 +1,6 @@
 import { MockList } from 'graphql-tools';
 import faker from 'faker/locale/en';
+import { packages } from './data/mock-data';
 
 // The mocks object is an Apollo Resolver Map where each mock function has the
 // following definition: (parent, args, context, info) => {}
@@ -23,11 +24,33 @@ const addTime = (originalDate, hoursLimit) => {
   return date.toISOString();
 };
 
+// Helper function to build an array of a given schema.
+export const generator = (schema, min = 1, max) => {
+  max = max || min;
+  return Array.from({
+    length: faker.random.number({
+      min,
+      max,
+    }),
+  }).map(() => {
+    const innerGen = (anySchema) => Object.keys(anySchema).reduce((entity, key) => {
+      if (Object.prototype.toString.call(anySchema[key]) === '[object Object]') {
+        entity[key] = innerGen(anySchema[key]);
+        return entity;
+      }
+      entity[key] = faker.fake(anySchema[key]);
+
+      return entity;
+    }, {});
+
+    return innerGen(schema());
+  });
+};
+
 //
 // 'scalar' and 'enum' mocks from typeDefs.
 //
 const mocks = {
-  // Upload: () => null; // Not used anywhere in schema.
   Date: () => faker.date.between('2018-11-01T00:00:00', '2019-10-31T23:59:59').toISOString(),
   JSON: () => ({ id: faker.random.number(), currency: 'usd' }),
   SshKeyType: () => faker.random.arrayElement(['ssh_rsa', 'ssh_ed25519']),
@@ -43,7 +66,7 @@ const mocks = {
   ProjectOrderType: () => faker.random.arrayElement(['name', 'created']),
   ProjectAvailability: () => faker.random.arrayElement(['standard', 'high']),
   GroupRole: () => faker.random.arrayElement(['guest', 'reporter', 'developer', 'maintainer', 'owner']),
-  Currency: () => faker.random.arrayElement(['aud', 'eur', 'gbp', 'usd', 'chf', 'zar']),
+  Currency: () => faker.random.arrayElement(['AUD', 'EUR', 'GBP', 'USD', 'CHF', 'ZAR']),
 };
 
 //
@@ -97,7 +120,7 @@ mocks.GroupMembership = (parent, args = {}, context, info) => ({
   role: mocks.GroupRole(),
 });
 
-mocks.GroupInterface = (parent, args = {}, context, info) => {
+mocks.Group = (parent, args = {}, context, info) => {
   const user = args.hasOwnProperty('user')
     ? args.user
     : mocks.User(null, {groups: []});
@@ -119,13 +142,14 @@ mocks.GroupInterface = (parent, args = {}, context, info) => {
   // Add a reference to the group to all of its members.
   user.groups.push(group);
   user2.groups.push(group);
+
   return group;
 };
 
-mocks.Group = mocks.GroupInterface;
+// mocks.Group = mocks.GroupInterface;
 
 mocks.BillingGroup = (parent, args = {}, context, info) => ({
-  ...mocks.GroupInterface(parent, args, context, info),
+  ...mocks.Group(parent, args, context, info),
   currency: mocks.Currency(),
   billingSoftware: faker.random.arrayElement(['Xero', 'Bexio', 'Clay tablets']),
 });
@@ -199,15 +223,17 @@ MIIJKQIBAAKCAgEA+o[...]P0yoL8BoQQG2jCvYfWh6vyglQdrDYx/o6/8ecTwXokKKh6fg1q
 -----END RSA PRIVATE KEY-----`,
     subfolder: '',
     notifications: [mocks.Notification()],
-    activeSystemsDeploy: 'lagoon_openshiftBuildDeploy',
-    activeSystemsPromote: 'lagoon_openshiftBuildDeploy',
-    activeSystemsRemove: 'lagoon_openshiftRemove',
-    activeSystemsTask: 'lagoon_openshiftJob',
+    activeSystemsDeploy: 'lagoon_controllerBuildDeploy',
+    activeSystemsPromote: 'lagoon_controllerBuildDeploy',
+    activeSystemsRemove: 'lagoon_controllerRemove',
+    activeSystemsTask: 'lagoon_controllerJob',
     branches: faker.random.arrayElement(['true', 'false', '^(master|staging)$']),
     pullrequests: faker.random.arrayElement(['true', 'false', '[BUILD]']),
     productionEnvironment: 'master',
     autoIdle: faker.random.arrayElement([0, 1]),
     storageCalc: faker.random.arrayElement([0, 1]),
+    problemsUi: faker.random.arrayElement([0, 1]),
+    factsUi: faker.random.arrayElement([0, 1]),
     openshift: mocks.Openshift(),
     openshiftProjectPattern: '${project}-${name}',
     developmentEnvironmentsLimit: 10,
@@ -266,6 +292,14 @@ mocks.Environment = (parent, args = {}, context, info) => {
     deployments: [],
     backups: [],
     tasks: [],
+    problems: [
+      mocks.Problem(null, {source: "Drutiny", severity: "CRITICAL"}),
+      mocks.Problem(null, {source: "Trivy", severity: "MEDIUM"}),
+      mocks.Problem(null, {source: "Drutiny", severity: "HIGH"}),
+      mocks.Problem(null, {source: "OWASP ZAP", severity: "LOW"}),
+      mocks.Problem(),
+      mocks.Problem()
+    ],
     services: [ mocks.EnvironmentService() ],
   };
   environment.project.environments.push(environment);
@@ -384,6 +418,67 @@ mocks.Task = (parent, args = {}, context, info) => {
   };
 };
 
+mocks.ProblemIdentifier = () => {
+  const recentYear = faker.random.arrayElement(['2019', '2020']);
+  const vuln_id = `CVE-${recentYear}-${faker.random.number({min: 1000, max: 99999})}`;
+  const severity = faker.random.arrayElement(['UNKNOWN', 'NEGLIGIBLE', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']);
+  const source = faker.random.arrayElement(['Harbor', 'Drutiny']);
+
+  return {
+    identifier: vuln_id,
+    severity: severity,
+    source: source,
+    problems: Array.from({
+        length: faker.random.number({
+            min: 1,
+            max: 20,
+        }),
+    }).map(() => {
+        return mocks.Problem()
+    })
+  }
+};
+
+mocks.Problem = (parent, args = {}, context, info) => {
+    const recentYear = faker.random.arrayElement(['2019', '2020']);
+    const vuln_id = `CVE-${recentYear}-${faker.random.number({min: 1000, max: 99999})}`;
+    const source = faker.random.arrayElement(['Lighthouse', 'Drutiny', 'Trivy', 'OWASP ZAP', 'Script']);
+    // const created = faker.date.between('2019-10-01 00:00:00', '2020-03-31 23:59:59').toUTCString();
+    const associatedPackage = faker.random.arrayElement(packages);
+    // const version = `${faker.random.number(4)}.${faker.random.number(9)}.${faker.random.number(49)}`;
+    // const fixedVersion = `${version}+deb8u${faker.random.number(9)}`;
+    const severity = faker.random.arrayElement(['UNKNOWN', 'NEGLIGIBLE', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']);
+    const description = faker.lorem.paragraph();
+    const links = `https://security-tracker.debian.org/tracker/${vuln_id}`;
+    const severityScore = `0.${faker.random.number({min:1, max:9})}`;
+    const data =  JSON.stringify({id: `${faker.random.number({min:1, max:100})}`}, null, '\t');
+
+    return {
+      identifier: vuln_id,
+      severity: args.hasOwnProperty('severity') ? args.severity : severity,
+      source: args.hasOwnProperty('source') ? args.source : source,
+      severityScore: severityScore,
+      associatedPackage: associatedPackage,
+      description,
+      links,
+      data
+    };
+};
+
+mocks.ProblemMutation = (schema) => {
+    return Array.from({
+        length: faker.random.number({
+            min: 1,
+            max: 500,
+        }),
+    }).map(() => {
+        let temp = schema();
+        return (
+            `problem${faker.random.number(1000000)}: addProblem(input: ${JSON.stringify(temp, 2, null)}) { identifier }`
+        );
+    });
+};
+
 //
 // Query 'type' mock from typeDefs.
 //
@@ -392,13 +487,15 @@ mocks.Query = () => ({
   projectByName: () => mocks.Project(),
   groupByName: () => mocks.Group(),
   projectByGitUrl: () => mocks.Project(),
+  projectsByMetadata: () => mocks.Project(),
   environmentByName: () => mocks.Environment(),
   environmentByOpenshiftProjectName: () => mocks.Environment(),
   userCanSshToEnvironment: () => mocks.Environment(),
   deploymentByRemoteId: () => mocks.Deployment(),
   taskByRemoteId: () => mocks.Task(),
-  allProjects: () => new MockList(9),
+  allProjects: () => new MockList(100),
   allOpenshifts: () => new MockList(9),
+  allProblems: () => new MockList(20),
   allEnvironments: (parent, args = {}, context, info) => {
     const project = args.hasOwnProperty('project')
       ? args.project
@@ -416,7 +513,53 @@ mocks.Query = () => ({
   allProjectsInGroup: () => new MockList(5),
   billingGroupCost: mockCost,
   allBillingGroupsCost: mockCost,
+  allBillingModifiers: mockModifier
 });
+
+const mockModifier = () => {
+  return [
+    {
+      "id": 18,
+      "group": {
+        "id": "6bd89c43-abdd-47e6-bda0-d2c598792d4c",
+        "name": "Lorem Ipsum",
+        "__typename": "BillingGroup"
+      },
+      "startDate": "2020-03-01 00:00:00",
+      "endDate": "2999-03-02 00:00:00",
+      "discountFixed": 0,
+      "discountPercentage": 0,
+      "extraFixed": 540,
+      "extraPercentage": 0,
+      "min": 0,
+      "max": 0,
+      "customerComments": "Rocket Chat",
+      "adminComments": "Rocket Chat",
+      "weight": 0,
+      "__typename": "BillingModifier"
+    },
+    {
+      "id": 25,
+      "group": {
+        "id": "6bd89c43-abdd-47e6-bda0-d2c598792d4c",
+        "name": "Accruent",
+        "__typename": "BillingGroup"
+      },
+      "startDate": "2020-04-01 00:00:00",
+      "endDate": "2020-04-30 00:00:00",
+      "discountFixed": 0,
+      "discountPercentage": 0,
+      "extraFixed": 1517,
+      "extraPercentage": 0,
+      "min": 0,
+      "max": 0,
+      "customerComments": "Per email with Alex and Jennifer, correction for Jan/Feb/Mar hits calculation",
+      "adminComments": "Back-billing for incorrect hits calculation",
+      "weight": 0,
+      "__typename": "BillingModifier"
+    }
+  ]
+}
 
 const mockCost = () => {
   const availability = mocks.ProjectAvailability();
@@ -512,6 +655,7 @@ mocks.Mutation = () => ({
   deployEnvironmentBranch: () => 'success',
   deployEnvironmentPullrequest: () => 'success',
   deployEnvironmentPromote: () => 'success',
+  switchActiveStandby: () => 'success',
   addGroup: () => mocks.Group(),
   updateGroup: () => mocks.Group(),
   deleteGroup: () => 'success',
