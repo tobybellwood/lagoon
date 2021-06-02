@@ -23,15 +23,21 @@
 * [Base Images](using-lagoon-advanced/base-images.md)
 * [Workflows](using-lagoon-advanced/workflows.md)
 * [Active/Standby](using-lagoon-advanced/active_standby.md)
+* [Triggering Deployments](using-lagoon-advanced/triggering-deployments.md)
 * [Backups](using-lagoon-advanced/backups.md)
 * [Remote Shell](using-lagoon-advanced/remote-shell.md)
 * [GraphQL](using-lagoon-advanced/graphql.md)
+* [Private Repositories](using-lagoon-advanced/private-repositories.md)
+* [SimpleSAML](using-lagoon-advanced/simplesaml.md)
+* [Project Default Users and SSH keys](using-lagoon-advanced/project-default-users-keys.md)
 * [Node.js Graceful Shutdown](using-lagoon-advanced/nodejs.md)
 * [Setting up Xdebug with Lagoon](using-lagoon-advanced/setting-up-xdebug-with-lagoon.md)
+* [Environment Idling](using-lagoon-advanced/environment-idling.md)
 
 ## Drupal
 
 * [Services](drupal/services/README.md)
+  * [Untitled](drupal/services/untitled.md)
   * [MariaDB](drupal/services/mariadb.md)
   * [Redis](drupal/services/redis.md)
   * [Solr](drupal/services/solr.md)
@@ -40,6 +46,8 @@
 * [First Deployment of Drupal](drupal/first-deployment-of-drupal.md)
 * [Drush 9](drupal/drush-9.md)
 * [Subfolders](drupal/subfolders.md)
+* [Integrate Drupal & Fastly](drupal/integrate-drupal-and-fastly.md)
+* [PHPUnit and PhpStorm](drupal/phpunit-and-phpstorm.md)
 
 ## Logging
 
@@ -52,6 +60,7 @@
 * [MariaDB](docker-images/mariadb/README.md)
   * [MariaDB-Drupal](docker-images/mariadb/mariadb-drupal.md)
 * [MongoDB](docker-images/mongodb.md)
+* [Node.js](docker-images/nodejs.md)
 * [NGINX](docker-images/nginx/README.md)
   * [NGINX-Drupal](docker-images/nginx/nginx-drupal.md)
 * [PHP-CLI](docker-images/php-cli/README.md)
@@ -84,8 +93,6 @@
 
 * [Developing Lagoon](contributing-to-lagoon/developing-lagoon.md)
 * [Install Local Kubernetes Cluster for Lagoon](contributing-to-lagoon/install-local-kubernetes-cluster-for-lagoon.md)
-* [Install Lagoon 1.x on OpenShift](contributing-to-lagoon/install/README.md)
-  * [OpenShift Requirements](contributing-to-lagoon/install/openshift_requirements.md)
 * [Code of Conduct](contributing-to-lagoon/code-of-conduct.md)
 * [Contributing](contributing-to-lagoon/contributing.md)
 * [Tests](contributing-to-lagoon/tests.md)
@@ -96,4 +103,5 @@
 * [FAQ](resources/faq.md)
 * [Glossary](resources/glossary.md)
 * [Tutorials, Webinars, and Videos](resources/tutorials-and-webinars.md)
+* [Lagoon Examples](https://github.com/uselagoon/lagoon-examples)
 

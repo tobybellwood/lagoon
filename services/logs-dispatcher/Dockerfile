@@ -1,4 +1,4 @@
-FROM fluent/fluentd:v1.11-1
+FROM fluent/fluentd:v1.12-1
 LABEL maintainer="support@amazee.io"
 
 ARG LAGOON_VERSION
@@ -9,6 +9,7 @@ USER root
 RUN apk add --no-cache --update --virtual .build-deps \
       build-base ruby-dev \
       && gem install fluent-plugin-cloudwatch-logs \
+      && gem install fluent-plugin-datadog \
       && gem install fluent-plugin-kubernetes_metadata_filter \
       && gem install fluent-plugin-multi-format-parser \
       && gem install fluent-plugin-prometheus \
@@ -18,6 +19,7 @@ RUN apk add --no-cache --update --virtual .build-deps \
       && gem install fluent-plugin-rewrite-tag-filter \
       && gem install fluent-plugin-route \
       && gem install fluent-plugin-s3 --no-document \
+      && gem install fluent-plugin-splunk-enterprise \
       && gem install fluent-plugin-sumologic_output \
       && gem sources --clear-all \
       && apk del .build-deps \

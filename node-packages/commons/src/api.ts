@@ -164,6 +164,7 @@ fragment on Project {
   name
   gitUrl
   privateKey
+  problemsUi
 }
 `);
 
@@ -847,6 +848,36 @@ export async function getEnvironmentByName(
   return result;
 }
 
+
+export async function getEnvironmentById(
+  id: number
+): Promise<any> {
+  const result = await graphqlapi.query(`
+    {
+      environmentById(id: ${id}) {
+        id,
+        name,
+        route,
+        routes,
+        deployType,
+        environmentType,
+        openshiftProjectName,
+        updated,
+        created,
+        deleted,
+      }
+    }
+  `);
+
+  if (!result || !result.environmentById) {
+    throw new EnvironmentNotFound(
+      `Cannot find environment for id ${id}\n${result.environmentById}`
+    );
+  }
+
+  return result;
+}
+
 export async function getDeploymentByName(
   openshiftProjectName: string,
   deploymentName: string,
@@ -1066,6 +1097,7 @@ export const getEnvironmentsForProject = (
     project:projectByName(name: "${project}"){
       developmentEnvironmentsLimit
       productionEnvironment
+      standbyProductionEnvironment
       environments(includeDeleted:false) { name, environmentType }
     }
   }

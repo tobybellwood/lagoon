@@ -300,7 +300,7 @@ const getControllerBuildData = async function(deployData: any) {
   var projectProductionEnvironment = projectOpenShift.productionEnvironment
   var projectStandbyEnvironment = projectOpenShift.standbyProductionEnvironment
   var subfolder = projectOpenShift.subfolder || ""
-  var routerPattern = projectOpenShift.openshift.routerPattern ? projectOpenShift.openshift.routerPattern.replace('${environment}',environmentName).replace('${project}', projectName) : ""
+  var routerPattern = projectOpenShift.openshift.routerPattern
   var prHeadBranch = headBranch || ""
   var prHeadSha = headSha || ""
   var prBaseBranch = baseBranch || ""
@@ -406,9 +406,11 @@ const getControllerBuildData = async function(deployData: any) {
   const buildName = `lagoon-build-${randBuildId}`;
 
   let deployment;
+  let environmentId;
   try {
     const now = moment.utc();
     const apiEnvironment = await getEnvironmentByName(branchName, projectOpenShift.id);
+    environmentId = apiEnvironment.environmentByName.id
     deployment = await addDeployment(buildName, "NEW", now.format('YYYY-MM-DDTHH:mm:ss'), apiEnvironment.environmentByName.id);
   } catch (error) {
     logger.error(`Could not save deployment for project ${projectOpenShift.id}. Message: ${error}`);
@@ -438,11 +440,13 @@ const getControllerBuildData = async function(deployData: any) {
       ...promoteData,
       gitReference: gitRef,
       project: {
+        id: projectOpenShift.id,
         name: projectName,
         gitUrl: gitUrl,
         uiLink: deployment.addDeployment.uiLink,
         environment: environmentName,
         environmentType: environmentType,
+        environmentId: environmentId,
         productionEnvironment: projectProductionEnvironment,
         standbyEnvironment: projectStandbyEnvironment,
         subfolder: subfolder,

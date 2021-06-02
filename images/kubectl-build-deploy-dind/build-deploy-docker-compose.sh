@@ -357,6 +357,7 @@ if [[ "$BUILD_TYPE" == "pullrequest"  ||  "$BUILD_TYPE" == "branch" ]]; then
   BUILD_ARGS+=(--build-arg IMAGE_REPO="${CI_OVERRIDE_IMAGE_REPO}")
   BUILD_ARGS+=(--build-arg LAGOON_PROJECT="${PROJECT}")
   BUILD_ARGS+=(--build-arg LAGOON_ENVIRONMENT="${ENVIRONMENT}")
+  BUILD_ARGS+=(--build-arg LAGOON_ENVIRONMENT_TYPE="${ENVIRONMENT_TYPE}")
   BUILD_ARGS+=(--build-arg LAGOON_BUILD_TYPE="${BUILD_TYPE}")
   BUILD_ARGS+=(--build-arg LAGOON_GIT_SOURCE_REPOSITORY="${SOURCE_REPOSITORY}")
 
@@ -529,6 +530,7 @@ yq write -i -- /kubectl-build-deploy/values.yaml 'buildType' $BUILD_TYPE
 yq write -i -- /kubectl-build-deploy/values.yaml 'routesAutogenerateInsecure' $ROUTES_AUTOGENERATE_INSECURE
 yq write -i -- /kubectl-build-deploy/values.yaml 'routesAutogenerateEnabled' $ROUTES_AUTOGENERATE_ENABLED
 yq write -i -- /kubectl-build-deploy/values.yaml 'routesAutogenerateSuffix' $ROUTER_URL
+yq write -i -- /kubectl-build-deploy/values.yaml 'routesAutogenerateShortSuffix' $SHORT_ROUTER_URL
 for i in $ROUTES_AUTOGENERATE_PREFIXES; do yq write -i -- /kubectl-build-deploy/values.yaml 'routesAutogeneratePrefixes[+]' $i; done
 yq write -i -- /kubectl-build-deploy/values.yaml 'kubernetes' $KUBERNETES
 yq write -i -- /kubectl-build-deploy/values.yaml 'lagoonVersion' $LAGOON_VERSION
@@ -600,20 +602,21 @@ do
     helm template ${SERVICE_NAME} /kubectl-build-deploy/helmcharts/${SERVICE_TYPE} -s $HELM_SERVICE_TEMPLATE -f /kubectl-build-deploy/values.yaml "${HELM_ARGUMENTS[@]}" > $YAML_FOLDER/${SERVICE_NAME}.yaml
   fi
 
-  HELM_INGRESS_TEMPLATE="templates/ingress.yaml"
-  if [ -f /kubectl-build-deploy/helmcharts/${SERVICE_TYPE}/$HELM_INGRESS_TEMPLATE ]; then
+  if [ $ROUTES_AUTOGENERATE_ENABLED == "true" ]; then
+    HELM_INGRESS_TEMPLATE="templates/ingress.yaml"
+    if [ -f /kubectl-build-deploy/helmcharts/${SERVICE_TYPE}/$HELM_INGRESS_TEMPLATE ]; then
 
-    # The very first generated route is set as MAIN_GENERATED_ROUTE
-    if [ -z "${MAIN_GENERATED_ROUTE+x}" ]; then
-      MAIN_GENERATED_ROUTE=$SERVICE_NAME
+      # The very first generated route is set as MAIN_GENERATED_ROUTE
+      if [ -z "${MAIN_GENERATED_ROUTE+x}" ]; then
+        MAIN_GENERATED_ROUTE=$SERVICE_NAME
+      fi
+
+      helm template ${SERVICE_NAME} /kubectl-build-deploy/helmcharts/${SERVICE_TYPE} -s $HELM_INGRESS_TEMPLATE -f /kubectl-build-deploy/values.yaml "${HELM_ARGUMENTS[@]}" > $YAML_FOLDER/${SERVICE_NAME}.yaml
     fi
-
-    helm template ${SERVICE_NAME} /kubectl-build-deploy/helmcharts/${SERVICE_TYPE} -s $HELM_INGRESS_TEMPLATE -f /kubectl-build-deploy/values.yaml "${HELM_ARGUMENTS[@]}" > $YAML_FOLDER/${SERVICE_NAME}.yaml
   fi
 
   HELM_DBAAS_TEMPLATE="templates/dbaas.yaml"
   if [ -f /kubectl-build-deploy/helmcharts/${SERVICE_TYPE}/$HELM_DBAAS_TEMPLATE ]; then
-    # cat $KUBERNETES_SERVICES_TEMPLATE
     # Load the requested class and plan for this service
     DBAAS_ENVIRONMENT="${MAP_SERVICE_NAME_TO_DBAAS_ENVIRONMENT["${SERVICE_NAME}"]}"
     yq write -i -- /kubectl-build-deploy/${SERVICE_NAME}-values.yaml 'environment' $DBAAS_ENVIRONMENT
@@ -828,9 +831,19 @@ if [ "${ENVIRONMENT_TYPE}" == "production" ]; then
           touch /kubectl-build-deploy/${ROUTE_DOMAIN}-values.yaml
           echo "$ROUTE_ANNOTATIONS" | yq p - annotations > /kubectl-build-deploy/${ROUTE_DOMAIN}-values.yaml
 
+          # ${ROUTE_DOMAIN} is used as a helm release name which be max 53 characters long.
+          # So we need some logic to make sure it's always max 53 characters
+          if [[ ${#ROUTE_DOMAIN} -gt 53 ]] ; then
+            # Trim the route domain to 47 characters, and add an 5 character hash of the domain at the end
+            # this gives a total of 53 characters
+            INGRESS_NAME=${ROUTE_DOMAIN:0:47}-$(echo ${ROUTE_DOMAIN} | md5sum | cut -f 1 -d " " | cut -c 1-5)
+          else
+            INGRESS_NAME=${ROUTE_DOMAIN}
+          fi
+
           # The very first found route is set as MAIN_CUSTOM_ROUTE
           if [ -z "${MAIN_CUSTOM_ROUTE+x}" ]; then
-            MAIN_CUSTOM_ROUTE=$ROUTE_DOMAIN
+            MAIN_CUSTOM_ROUTE=$INGRESS_NAME
 
             # if we are in production we enabled monitoring for the main custom route
             if [ "${ENVIRONMENT_TYPE}" == "production" ]; then
@@ -843,7 +856,7 @@ if [ "${ENVIRONMENT_TYPE}" == "production" ]; then
 
           cat /kubectl-build-deploy/${ROUTE_DOMAIN}-values.yaml
 
-          helm template ${ROUTE_DOMAIN} \
+          helm template ${INGRESS_NAME} \
             /kubectl-build-deploy/helmcharts/custom-ingress \
             --set host="${ROUTE_DOMAIN}" \
             --set service="${ROUTE_SERVICE}" \
@@ -938,9 +951,19 @@ if [ "${ENVIRONMENT_TYPE}" == "production" ]; then
           touch /kubectl-build-deploy/${ROUTE_DOMAIN}-values.yaml
           echo "$ROUTE_ANNOTATIONS" | yq p - annotations > /kubectl-build-deploy/${ROUTE_DOMAIN}-values.yaml
 
+          # ${ROUTE_DOMAIN} is used as a helm release name which be max 53 characters long.
+          # So we need some logic to make sure it's always max 53 characters
+          if [[ ${#ROUTE_DOMAIN} -gt 53 ]] ; then
+            # Trim the route domain to 47 characters, and add an 5 character hash of the domain at the end
+            # this gives a total of 53 characters
+            INGRESS_NAME=${ROUTE_DOMAIN:0:47}-$(echo ${ROUTE_DOMAIN} | md5sum | cut -f 1 -d " " | cut -c 1-5)
+          else
+            INGRESS_NAME=${ROUTE_DOMAIN}
+          fi
+
           # The very first found route is set as MAIN_CUSTOM_ROUTE
           if [ -z "${MAIN_CUSTOM_ROUTE+x}" ]; then
-            MAIN_CUSTOM_ROUTE=$ROUTE_DOMAIN
+            MAIN_CUSTOM_ROUTE=$INGRESS_NAME
 
             # if we are in production we enabled monitoring for the main custom route
             if [ "${ENVIRONMENT_TYPE}" == "production" ]; then
@@ -953,7 +976,7 @@ if [ "${ENVIRONMENT_TYPE}" == "production" ]; then
 
           cat /kubectl-build-deploy/${ROUTE_DOMAIN}-values.yaml
 
-          helm template ${ROUTE_DOMAIN} \
+          helm template ${INGRESS_NAME} \
             /kubectl-build-deploy/helmcharts/custom-ingress \
             --set host="${ROUTE_DOMAIN}" \
             --set service="${ROUTE_SERVICE}" \
@@ -1050,12 +1073,22 @@ if [ -n "$(cat .lagoon.yml | shyaml keys ${PROJECT}.environments.${BRANCH//./\\.
         ROUTE_FASTLY_SERVICE_WATCH=true
       fi
 
+      # ${ROUTE_DOMAIN} is used as a helm release name which be max 53 characters long.
+      # So we need some logic to make sure it's always max 53 characters
+      if [[ ${#ROUTE_DOMAIN} -gt 53 ]] ; then
+        # Trim the route domain to 47 characters, and add an 5 character hash of the domain at the end
+        # this gives a total of 53 characters
+        INGRESS_NAME=${ROUTE_DOMAIN:0:47}-$(echo ${ROUTE_DOMAIN} | md5sum | cut -f 1 -d " " | cut -c 1-5)
+      else
+        INGRESS_NAME=${ROUTE_DOMAIN}
+      fi
+
       touch /kubectl-build-deploy/${ROUTE_DOMAIN}-values.yaml
       echo "$ROUTE_ANNOTATIONS" | yq p - annotations > /kubectl-build-deploy/${ROUTE_DOMAIN}-values.yaml
 
       # The very first found route is set as MAIN_CUSTOM_ROUTE
       if [ -z "${MAIN_CUSTOM_ROUTE+x}" ]; then
-        MAIN_CUSTOM_ROUTE=$ROUTE_DOMAIN
+        MAIN_CUSTOM_ROUTE=$INGRESS_NAME
 
         # if we are in production we enabled monitoring for the main custom route
         if [ "${ENVIRONMENT_TYPE}" == "production" ]; then
@@ -1068,7 +1101,7 @@ if [ -n "$(cat .lagoon.yml | shyaml keys ${PROJECT}.environments.${BRANCH//./\\.
 
       cat /kubectl-build-deploy/${ROUTE_DOMAIN}-values.yaml
 
-      helm template ${ROUTE_DOMAIN} \
+      helm template ${INGRESS_NAME} \
         /kubectl-build-deploy/helmcharts/custom-ingress \
         --set host="${ROUTE_DOMAIN}" \
         --set service="${ROUTE_SERVICE}" \
@@ -1160,9 +1193,19 @@ else
       touch /kubectl-build-deploy/${ROUTE_DOMAIN}-values.yaml
       echo "$ROUTE_ANNOTATIONS" | yq p - annotations > /kubectl-build-deploy/${ROUTE_DOMAIN}-values.yaml
 
+      # ${ROUTE_DOMAIN} is used as a helm release name which be max 53 characters long.
+      # So we need some logic to make sure it's always max 53 characters
+      if [[ ${#ROUTE_DOMAIN} -gt 53 ]] ; then
+        # Trim the route domain to 47 characters, and add an 5 character hash of the domain at the end
+        # this gives a total of 53 characters
+        INGRESS_NAME=${ROUTE_DOMAIN:0:47}-$(echo ${ROUTE_DOMAIN} | md5sum | cut -f 1 -d " " | cut -c 1-5)
+      else
+        INGRESS_NAME=${ROUTE_DOMAIN}
+      fi
+
       # The very first found route is set as MAIN_CUSTOM_ROUTE
       if [ -z "${MAIN_CUSTOM_ROUTE+x}" ]; then
-        MAIN_CUSTOM_ROUTE=$ROUTE_DOMAIN
+        MAIN_CUSTOM_ROUTE=$INGRESS_NAME
 
         # if we are in production we enabled monitoring for the main custom route
         if [ "${ENVIRONMENT_TYPE}" == "production" ]; then
@@ -1175,7 +1218,7 @@ else
 
       cat /kubectl-build-deploy/${ROUTE_DOMAIN}-values.yaml
 
-      helm template ${ROUTE_DOMAIN} \
+      helm template ${INGRESS_NAME} \
         /kubectl-build-deploy/helmcharts/custom-ingress \
         --set host="${ROUTE_DOMAIN}" \
         --set service="${ROUTE_SERVICE}" \
@@ -1225,17 +1268,17 @@ if [[ "${CAPABILITIES[@]}" =~ "backup.appuio.ch/v1alpha1/Schedule" ]]; then
   PRODUCTION_DAILY_BACKUP_RETENTION=$(cat .lagoon.yml | shyaml get-value backup-retention.production.daily "")
 
   # Set template parameters for retention values (prefer .lagoon.yml values over supplied defaults after ensuring they are valid integers via "-eq" comparison)
-  if [ ! -z $PRODUCTION_MONTHLY_BACKUP_RETENTION ] && [ "$PRODUCTION_MONTHLY_BACKUP_RETENTION" -eq "$PRODUCTION_MONTHLY_BACKUP_RETENTION" ] && [ $ENVIRONMENT_TYPE = 'production']; then
+  if [ ! -z $PRODUCTION_MONTHLY_BACKUP_RETENTION ] && [ "$PRODUCTION_MONTHLY_BACKUP_RETENTION" -eq "$PRODUCTION_MONTHLY_BACKUP_RETENTION" ] && [ $ENVIRONMENT_TYPE = 'production' ]; then
     MONTHLY_BACKUP_RETENTION=${PRODUCTION_MONTHLY_BACKUP_RETENTION}
   else
     MONTHLY_BACKUP_RETENTION=${MONTHLY_BACKUP_DEFAULT_RETENTION}
   fi
-  if [ ! -z $PRODUCTION_WEEKLY_BACKUP_RETENTION ] && [ "$PRODUCTION_WEEKLY_BACKUP_RETENTION" -eq "$PRODUCTION_WEEKLY_BACKUP_RETENTION" ] && [ $ENVIRONMENT_TYPE = 'production']; then
+  if [ ! -z $PRODUCTION_WEEKLY_BACKUP_RETENTION ] && [ "$PRODUCTION_WEEKLY_BACKUP_RETENTION" -eq "$PRODUCTION_WEEKLY_BACKUP_RETENTION" ] && [ $ENVIRONMENT_TYPE = 'production' ]; then
     WEEKLY_BACKUP_RETENTION=${PRODUCTION_WEEKLY_BACKUP_RETENTION}
   else
     WEEKLY_BACKUP_RETENTION=${WEEKLY_BACKUP_DEFAULT_RETENTION}
   fi
-  if [ ! -z $PRODUCTION_DAILY_BACKUP_RETENTION ] && [ "$PRODUCTION_DAILY_BACKUP_RETENTION" -eq "$PRODUCTION_DAILY_BACKUP_RETENTION" ] && [ $ENVIRONMENT_TYPE = 'production']; then
+  if [ ! -z $PRODUCTION_DAILY_BACKUP_RETENTION ] && [ "$PRODUCTION_DAILY_BACKUP_RETENTION" -eq "$PRODUCTION_DAILY_BACKUP_RETENTION" ] && [ $ENVIRONMENT_TYPE = 'production' ]; then
     DAILY_BACKUP_RETENTION=${PRODUCTION_DAILY_BACKUP_RETENTION}
   else
     DAILY_BACKUP_RETENTION=${DAILY_BACKUP_DEFAULT_RETENTION}
@@ -1269,8 +1312,7 @@ if [[ "${CAPABILITIES[@]}" =~ "backup.appuio.ch/v1alpha1/Schedule" ]]; then
     --set baasBucketName="${BAAS_BUCKET_NAME}" > $YAML_FOLDER/k8up-lagoon-backup-schedule.yaml \
     --set prune.retention.keepMonthly=$MONTHLY_BACKUP_RETENTION \
     --set prune.retention.keepWeekly=$WEEKLY_BACKUP_RETENTION \
-    --set prune.retention.keepDaily=$DAILY_BACKUP_RETENTION \
-    --set lagoonEnvironmentType=$LAGOON_ENVIRONMENT_TYPE
+    --set prune.retention.keepDaily=$DAILY_BACKUP_RETENTION
 fi
 
 if [ "$(ls -A $YAML_FOLDER/)" ]; then
@@ -1402,7 +1444,43 @@ if [ "$BUILD_TYPE" == "pullrequest" ] || [ "$BUILD_TYPE" == "branch" ]; then
   for IMAGE_NAME in "${!IMAGES_PULL[@]}"
   do
     PULL_IMAGE="${IMAGES_PULL[${IMAGE_NAME}]}"
-    . /kubectl-build-deploy/scripts/exec-kubernetes-copy-to-registry.sh
+
+    # Try to handle private registries first
+    if [ $PRIVATE_REGISTRY_COUNTER -gt 0 ]; then
+      if [ $PRIVATE_EXTERNAL_REGISTRY ]; then
+        EXTERNAL_REGISTRY=0
+        for EXTERNAL_REGISTRY_URL in "${PRIVATE_REGISTRY_URLS[@]}"
+        do
+          # strip off "http://" or "https://" from registry url if present
+          bare_url="${EXTERNAL_REGISTRY_URL#http://}"
+          bare_url="${EXTERNAL_REGISTRY_URL#https://}"
+
+          # Test registry to see if image is from an external registry or just private docker hub
+          case $bare_url in
+            "$PULL_IMAGE"*)
+              EXTERNAL_REGISTRY=1
+              ;;
+          esac
+        done
+
+        # If this image is hosted in an external registry, pull it from there
+        if [ $EXTERNAL_REGISTRY -eq 1 ]; then
+          skopeo copy --dest-tls-verify=false docker://${PULL_IMAGE} docker://${REGISTRY}/${PROJECT}/${ENVIRONMENT}/${IMAGE_NAME}:${IMAGE_TAG:-latest}
+        # If this image is not from an external registry, but docker hub creds were supplied, pull it straight from Docker Hub
+        elif [ $PRIVATE_DOCKER_HUB_REGISTRY -eq 1 ]; then
+          skopeo copy --dest-tls-verify=false docker://${PULL_IMAGE} docker://${REGISTRY}/${PROJECT}/${ENVIRONMENT}/${IMAGE_NAME}:${IMAGE_TAG:-latest}
+        # If image not from an external registry and no docker hub creds were supplied, pull image from the imagecache
+        else
+          skopeo copy --dest-tls-verify=false docker://${IMAGECACHE_REGISTRY}/${PULL_IMAGE} docker://${REGISTRY}/${PROJECT}/${ENVIRONMENT}/${IMAGE_NAME}:${IMAGE_TAG:-latest}
+        fi
+      # If the private registry counter is 1 and no external registry was listed, we know a private docker hub was specified
+      else
+        skopeo copy --dest-tls-verify=false docker://${PULL_IMAGE} docker://${REGISTRY}/${PROJECT}/${ENVIRONMENT}/${IMAGE_NAME}:${IMAGE_TAG:-latest}
+      fi
+    # If no private registries, use the imagecache
+    else
+      skopeo copy --dest-tls-verify=false docker://${IMAGECACHE_REGISTRY}/${PULL_IMAGE} docker://${REGISTRY}/${PROJECT}/${ENVIRONMENT}/${IMAGE_NAME}:${IMAGE_TAG:-latest}
+    fi
 
     IMAGE_HASHES[${IMAGE_NAME}]=$(skopeo inspect docker://${REGISTRY}/${PROJECT}/${ENVIRONMENT}/${IMAGE_NAME}:${IMAGE_TAG:-latest} --tls-verify=false | jq ".Name + \"@\" + .Digest" -r)
   done
