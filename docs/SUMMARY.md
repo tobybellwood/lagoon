@@ -72,8 +72,7 @@
 * [RabbitMQ](docker-images/rabbitmq.md)
 * [Solr](docker-images/solr/README.md)
   * [Solr-Drupal](docker-images/solr/solr-drupal.md)
-* [Redis](docker-images/redis/README.md)
-  * [Redis-persistent](docker-images/redis/redis-persistent.md)
+* [Redis](docker-images/redis.md)
 * [Varnish](docker-images/varnish/README.md)
   * [Varnish-Drupal](docker-images/varnish/varnish-drupal.md)
 
