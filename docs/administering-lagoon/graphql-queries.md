@@ -29,7 +29,7 @@ Under "GraphQL Endpoint", enter the API endpoint URL with `/graphql` on the end.
 
 Press ESC to close the HTTP header overlay and now we are ready to send the first GraphQL request!
 
-![Editing HTTP Headers in GraphiQL.](../.gitbook/assets/graphiql-2020-01-29-18-05-54%20%285%29%20%285%29%20%287%29%20%281%29%20%284%29.png)
+![Editing HTTP Headers in GraphiQL.](./graphiql-2020-01-29-18-05-54.png)
 
 Enter this in the left panel
 
@@ -41,7 +41,7 @@ query allProjects{
 }
 ```
 
-![Running a query in GraphiQL.](../.gitbook/assets/graphiql-2020-01-29-20-10-32.png)
+![Running a query in GraphiQL.](./graphiql-2020-01-29-20-10-32.png)
 
 And press the ▶️ button \(or press CTRL+ENTER\).
 

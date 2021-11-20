@@ -112,5 +112,5 @@ This, then, will define our task for our project \(42\). When we run this, we wi
 
 This task will now be available to run from the UI for anyone with the `DEVELOPER` or `MAINTAINER` role.
 
-![Task List](../.gitbook/assets/task-yarn-audit.png)
+![Task List](./task-yarn-audit.png)
 

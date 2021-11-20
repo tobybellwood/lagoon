@@ -68,10 +68,10 @@ Before you switch over your domain to Lagoon, make sure you lower the Time-to-Li
 
 ### Recommended settings for Fastly:
 
-CNAME: [cdn.amazee.io](http://cdn.amazee.io/)  
-A 151.101.2.191  
-A 151.101.66.191  
-A 151.101.130.191  
+CNAME: [cdn.amazee.io](http://cdn.amazee.io/)
+A 151.101.2.191
+A 151.101.66.191
+A 151.101.130.191
 A 151.101.194.191
 
 {% hint style="info" %}
@@ -99,5 +99,5 @@ Lagoon understands the concept of development and production environments. Devel
 
 During project setup, the production environment should already be defined. If that's omitted, your environment will run in development mode. You can check if the environment is set as production environment in the Lagoon user interface. If the production environment is not set, let your Lagoon administrator know, and they will configure the system accordingly.
 
-![The production environment is labelled in green on the left. ](../.gitbook/assets/lagoon-ui-production%20%282%29%20%282%29%20%283%29%20%284%29%20%284%29%20%284%29%20%284%29.png)
+![The production environment is labelled in green on the left. ](./lagoon-ui-production.png)
 

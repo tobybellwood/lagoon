@@ -1,10 +1,10 @@
 # PHPUnit and PhpStorm
 
 {% hint style="info" %}
-**This document assumes the following:** 
+**This document assumes the following:**
 
-* You are using Docker. 
-* You are using a standard Amazee/Lagoon project with a [`docker-compose.yml`](../using-lagoon-the-basics/docker-compose-yml.md) file. 
+* You are using Docker.
+* You are using a standard Amazee/Lagoon project with a [`docker-compose.yml`](../using-lagoon-the-basics/docker-compose-yml.md) file.
 * You are on a Mac - it should work for other operating systems but folder structure and some configuration settings may be different.
 {% endhint %}
 
@@ -24,7 +24,7 @@
 2. Click: `+`
 3. Select\*: `Docker for Mac`
 
-![Set Up Docker](../.gitbook/assets/1-docker-setup.png)
+![Set Up Docker](./1-docker-setup.png)
 
 
 
@@ -44,7 +44,7 @@
    * Local path: `<ROOT_PATH>`
    * Remote path\*: `/app`
 
-![Add a new CLI interpreter:](../.gitbook/assets/2-cli-interpreter.png)
+![Add a new CLI interpreter:](./2-cli-interpreter.png)
 
 
 
@@ -61,7 +61,7 @@
    * Path to script\*: `/app/vendor/autoload.php`
    * Default configuration file\*: `/app/web/core/phpunit.xml`
 
-![Add Remote Interpreter](../.gitbook/assets/3-remote-interpreter-setup.png)
+![Add Remote Interpreter](./3-remote-interpreter-setup.png)
 
 
 
@@ -73,7 +73,7 @@
       * Test scope: `Defined in the configuration file`
       * Interpreter: `<CLI_INTERPRETER>`
 
-![Configure runner](../.gitbook/assets/4-configure-runner.png)
+![Configure runner](./4-configure-runner.png)
 
 **\***If you are not on a Mac, this may vary.
 
@@ -87,9 +87,9 @@
 
 ## Ready to Run!
 
-Now you have the above configuration set up it should be as straightforward as going to the test you want to run and pressing the green arrow! 
+Now you have the above configuration set up it should be as straightforward as going to the test you want to run and pressing the green arrow!
 
 Once you press this PhpStorm will use docker to enter the cli container than start running PHPUnit based upon the config, exciting right?
 
-![Here it is in action, look at it go!!](../.gitbook/assets/5-going-green-1-.gif)
+![Here it is in action, look at it go!!](./5-going-green-1-.gif)
 
