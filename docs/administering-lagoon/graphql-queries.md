@@ -219,9 +219,8 @@ Now for every deployment you will receive messages in your defined channel.
 
 ### Adding a new OpenShift target
 
-{% hint style="info" %}
-In Lagoon 1.x `addOpenshift` is used for both OpenShift and Kubernetes targets. In Lagoon 2.x this will change.
-{% endhint %}
+!!! Note "Note:"
+	In Lagoon 1.x `addOpenshift` is used for both OpenShift and Kubernetes targets. In Lagoon 2.x this will change.
 
 The OpenShift cluster to which Lagoon should deploy. Lagoon is not only capable of deploying to its own OpenShift, but also to any OpenShift anywhere in the world.
 
@@ -412,9 +411,8 @@ mutation {
 
 Update the production environment within a project:
 
-{% hint style="warning" %}
+!!! warning "Warning:"
 This requires a redeploy in order for the changes to be reflected in the containers.
-{% endhint %}
 
 ```graphql
  mutation {

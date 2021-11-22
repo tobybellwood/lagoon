@@ -14,9 +14,8 @@ description: >-
 * Cert manager (for TLS) - We highly recommend using letsencrypt
 * RWO storage
 
-{% hint style="info" %}
-We acknowledge that this is a lot of steps, and our roadmap for the immediate future includes reducing the number of steps in this process.&#x20;
-{% endhint %}
+!!! Note "Note:"
+	We acknowledge that this is a lot of steps, and our roadmap for the immediate future includes reducing the number of steps in this process.&#x20;
 
 ## **Install Lagoon Core**
 
@@ -47,13 +46,11 @@ We acknowledge that this is a lot of steps, and our roadmap for the immediate fu
       2. Secret: use `lagoon-core-keycloak` secret key-value: `LAGOON-CORE-KEYCLOAK`
       3. Retrieve the secret:` kubectl -n lagoon-core get secret lagoon-core-keycloak -o jsonpath="{.data.KEYCLOAK_LAGOON_ADMIN_PASSWORD}" | base64 --decode`
 
-{% hint style="warning" %}
+!!! warning "Warning:"
 Note: Sometimes we run into Docker Hub pull limits. We are considering moving our images elsewhere if this continues to be a problem.&#x20;
-{% endhint %}
 
-{% hint style="info" %}
-Note: Currently Lagoon only supports one Lagoon per cluster - meaning you can’t currently split your dev/test/prod environments across separate clusters, but this is something we are looking to implement in the future.&#x20;
-{% endhint %}
+!!! Note "Note:"
+	Note: Currently Lagoon only supports one Lagoon per cluster - meaning you can’t currently split your dev/test/prod environments across separate clusters, but this is something we are looking to implement in the future.&#x20;
 
 ## **Install the Lagoon CLI**
 
@@ -74,9 +71,8 @@ Note: Currently Lagoon only supports one Lagoon per cluster - meaning you can’
       1. Lagoon talks to SSH and authenticates against your public/private key pair, and gets a token for your username.
    2. Verify via `lagoon whoami` that you are logged in.
 
-{% hint style="info" %}
-Note: We don’t generally recommend using the Lagoon Admin role, but you’ll need to create an admin account at first to get started. Ideally, you’ll immediately create another account to work from which is _not_ an admin.
-{% endhint %}
+!!! Note "Note:"
+	Note: We don’t generally recommend using the Lagoon Admin role, but you’ll need to create an admin account at first to get started. Ideally, you’ll immediately create another account to work from which is _not_ an admin.
 
 ## Create Lagoon user
 
@@ -102,7 +98,7 @@ expose:
   tls:
     enabled: true
     certSource: secret
-    secret:    
+    secret:
       secretName: harbor-harbor-ingress
 externalURL: https://harbor.lagoon.example.com
 harborAdminPassword: <your Harbor Admin Password>
@@ -163,7 +159,7 @@ lagoon-build-deploy:
   taskAPIHost: "api.lagoon.example.com"
 dbaas-operator:
   enabled: true
-    
+
   mariadbProviders:
     production:
       environment: production
@@ -237,9 +233,8 @@ dbaas-operator:
        1. consoleUrl: API Endpoint of Kubernetes Cluster
        2. token: `kubectl -n lagoon describe secret $(kubectl -n lagoon get secret | grep kubernetes-build-deploy | awk '{print $1}') | grep token: | awk '{print $2}'`
 
-{% hint style="info" %}
-Note: Authorization tokens for GraphQL are very short term so you may need to generate a new one. Run `lagoon login` and then cat the `.lagoon.yml` file to get the new token, and replace the old token in the HTTP header with the new one.&#x20;
-{% endhint %}
+!!! Note "Note:"
+	Note: Authorization tokens for GraphQL are very short term so you may need to generate a new one. Run `lagoon login` and then cat the `.lagoon.yml` file to get the new token, and replace the old token in the HTTP header with the new one.&#x20;
 
 ## Add a Project
 

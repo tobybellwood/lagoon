@@ -9,9 +9,8 @@ The [Lagoon `node` Docker image](https://github.com/uselagoon/lagoon-images/tree
 * 14 `uselagoon/node-14` or `uselagoon/node-14-builder`
 * 16 `uselagoon/node-16` or `uselagoon/node-16-builder`
 
-{% hint style="info" %}
-We stop updating EOL Node.js images usually with the Lagoon release that comes after the officially communicated EOL date: [https://nodejs.org/en/about/releases/](https://nodejs.org/en/about/releases/).
-{% endhint %}
+!!! Note "Note:"
+	We stop updating EOL Node.js images usually with the Lagoon release that comes after the officially communicated EOL date: [https://nodejs.org/en/about/releases/](https://nodejs.org/en/about/releases/).
 
 ## Lagoon adaptions
 

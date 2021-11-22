@@ -2,15 +2,13 @@
 
 [Harbor](https://goharbor.io/) is used as the default package repository for Lagoon when deploying to Kubernetes infrastructure. Harbor provides a Docker registry and a container security scanning solution provided by [Trivy](https://github.com/aquasecurity/trivy).
 
-{% hint style="info" %}
-When running Lagoon locally, the configuration for Harbor is handled entirely automagically.
-{% endhint %}
+!!! Note "Note:"
+	When running Lagoon locally, the configuration for Harbor is handled entirely automagically.
 
 If you are running Lagoon locally, you can access that UI at [localhost:8084](https://localhost:8084/). The username is `admin` and the password is `admin`.
 
-{% hint style="info" %}
-If you are hosting a site with amazee.io, we do not allow customer access to the Harbor UI within amazee.io's Lagoon.
-{% endhint %}
+!!! Note "Note:"
+	If you are hosting a site with amazee.io, we do not allow customer access to the Harbor UI within amazee.io's Lagoon.
 
 Once logged in, the first screen is a list of all repositories your user has access to. Each "repository" in Harbor correlates to a project in Lagoon.
 

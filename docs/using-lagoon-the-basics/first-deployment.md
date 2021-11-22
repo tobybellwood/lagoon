@@ -8,9 +8,8 @@ description: >-
 
 ![excited](https://i.giphy.com/media/7kVRZwYRwF1ok/giphy-downsized.gif)
 
-{% hint style="info" %}
-If you are deploying a Drupal Project, skip this and read the [Drupal-specific first deployment documentation](../drupal/first-deployment-of-drupal.md).
-{% endhint %}
+!!! Note "Note:"
+	If you are deploying a Drupal Project, skip this and read the [Drupal-specific first deployment documentation](../drupal/first-deployment-of-drupal.md).
 
 ## 1. Make sure you are ready
 

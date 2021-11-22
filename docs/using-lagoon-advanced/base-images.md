@@ -16,9 +16,8 @@ Further, the derived image includes a call to the script `/build/pre_composer`, 
 
 ## Anatomy of a base image
 
-{% hint style="info" %}
-**Note**: this document will talk about Drupal and Laravel base images as examples, as it was originally written for a client who uses those technologies in their Lagoon projects. It will be expanded to cover the contents of other base images, but none of the processes differ, no matter what the content of your base image.
-{% endhint %}
+!!! Note "Note:"
+	**Note**: this document will talk about Drupal and Laravel base images as examples, as it was originally written for a client who uses those technologies in their Lagoon projects. It will be expanded to cover the contents of other base images, but none of the processes differ, no matter what the content of your base image.
 
 Base images are managed with [Composer](https://getcomposer.org/) and hosted in [Bitbucket](https://bitbucket.org/), [Github](https://github.com/), or [GitLab](https://gitlab.com/) \(whatever your team is using\). Each base image has its own repository.
 
@@ -138,9 +137,8 @@ There are many reasons to release a new version of a base image. On Drupal or La
 
 The images that your project's base images are built on are the managed images maintained by amazee.io. We periodically release updates to these underlying images. When these are updated, you need to build new versions of your own base images in order to incorporate the changes and upgrades bundled in the amazee.io images.
 
-{% hint style="info" %}
-**Note**: if you are using amazee.io's hosting service, your service agreement may dictate that amazee.io updates your base images, or that you do - it can be done by either party.
-{% endhint %}
+!!! Note "Note:"
+	**Note**: if you are using amazee.io's hosting service, your service agreement may dictate that amazee.io updates your base images, or that you do - it can be done by either party.
 
 In this section we will demonstrate the process of updating and tagging a new release of the Drupal 8 base image. We will add a new module \([ClamAV](https://www.drupal.org/project/clamav)\) to the base. We’re demonstrating on Drupal because it has the most complex setup of the base images. The steps that are common to every base image are noted below.
 
@@ -156,9 +154,8 @@ git clone ssh://git@bitbucket.biscrum.com:7999/webpro/drupal8_base_image.git
 
 #### Step 2 - Make the changes to the repository
 
-{% hint style="info" %}
-**Note:** What is demonstrated here is specific to the Drupal 8 base image. However, any changes \(adding files, changing base Docker images, etc.\) will be done in this step for all of the base images.
-{% endhint %}
+!!! Note "Note:"
+	**Note:** What is demonstrated here is specific to the Drupal 8 base image. However, any changes \(adding files, changing base Docker images, etc.\) will be done in this step for all of the base images.
 
 In our example, we are adding the ClamAV module to the Drupal 8 base image. This involves a few steps. The first is requiring the package so that it gets added to our `composer.json` file. This is done by running a `composer require`.
 
@@ -202,9 +199,8 @@ drush pm-enable lagoon_bundle -y
 
 ![Running \`drush pm-enable lagoon\_bundle -y\` and seeing that it also enables ClamAV](../5.gif)
 
-{% hint style="warning" %}
+!!! warning "Warning:"
 **Note:** You’ll see that there is a JWT error in the container above. You can safely ignore this in the demonstration above - but, for background, you will see this error when there is no Lagoon environment for the site you’re working on.
-{% endhint %}
 
 With our testing done, we can now tag and build the images.
 
@@ -225,17 +221,15 @@ We check that we have committed \(but not pushed\) our changes, just as you woul
 4. Next, we push our tags with `git push --tags`.
 5. And finally, push all of our changes with `git push`.
 
-{% hint style="danger" %}
-**Note:** The tags must be pushed explicitly in their own step!
-{% endhint %}
+!!! Danger "Danger:"
+	**Note:** The tags must be pushed explicitly in their own step!
 
 ![Demonstrating how to tag and push a base image.](../6.gif)
 
 #### How Git tags map to image tags
 
-{% hint style="danger" %}
-**Important note:** Depending on the build workflow, you will almost certainly push the changes via the **develop** branch before merging it into the **main** branch.
-{% endhint %}
+!!! Danger "Danger:"
+	**Important note:** Depending on the build workflow, you will almost certainly push the changes via the **develop** branch before merging it into the **main** branch.
 
 An important point to remember here is that the Jenkins base image build process will tag _images_ based on the _most recent commit’s tag_.
 
@@ -248,9 +242,8 @@ Images are tagged using the following rules, and images will be built for each o
 
 #### Step 4 - Building the new base images.
 
-{% hint style="info" %}
-**Note:** Generally you will have a trigger strategy set up here for automatic builds, but as that will differ based on your needs and setup, this explains how to build manually.
-{% endhint %}
+!!! Note "Note:"
+	**Note:** Generally you will have a trigger strategy set up here for automatic builds, but as that will differ based on your needs and setup, this explains how to build manually.
 
 1. Visit your Lagoon Jenkins instance.
 2. Select the project you are working on \(in this case, AIOBI Drupal 8 Base\).

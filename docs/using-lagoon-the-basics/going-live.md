@@ -46,9 +46,8 @@ environments:
 {% endtab %}
 {% endtabs %}
 
-{% hint style="info" %}
-As checking every page of your website might be a bit a tedious job, you can make use of [mixed-content-scan](https://github.com/bramus/mixed-content-scan). This will crawl the entire site and give you back pages that include assets from a non-HTTPS site.
-{% endhint %}
+!!! Note "Note:"
+	As checking every page of your website might be a bit a tedious job, you can make use of [mixed-content-scan](https://github.com/bramus/mixed-content-scan). This will crawl the entire site and give you back pages that include assets from a non-HTTPS site.
 
 ### Redirects
 
@@ -74,9 +73,8 @@ A 151.101.66.191
 A 151.101.130.191
 A 151.101.194.191
 
-{% hint style="info" %}
-We do not suggest configuring any static IP addresses in your DNS zones. The Lagoon load balancer infrastructure may change over time which can have impact on your site availability if you configure a static IP address.
-{% endhint %}
+!!! Note "Note:"
+	We do not suggest configuring any static IP addresses in your DNS zones. The Lagoon load balancer infrastructure may change over time which can have impact on your site availability if you configure a static IP address.
 
 ### Root Domains
 

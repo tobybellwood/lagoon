@@ -12,9 +12,8 @@ Lagoon local development environments are built for `pygmy`, which itself is bas
 
 If you are already using `pygmy`, then you can skip this. Here's how to migrate from `cachalot` to `pygmy`:
 
-{% hint style="danger" %}
-Make sure that you have all local code committed and all local databases and files backed up or synced. There is, unfortunately, no way to migrate the databases over to pygmy, so make sure that there is nothing you will be sad about if it is gone.
-{% endhint %}
+!!! Danger "Danger:"
+	Make sure that you have all local code committed and all local databases and files backed up or synced. There is, unfortunately, no way to migrate the databases over to pygmy, so make sure that there is nothing you will be sad about if it is gone.
 
 1. Remove cachalot VM: `cachalot destroy`.
 2. Uninstall cachalot: `gem uninstall cachalot` \(might need `sudo`\).

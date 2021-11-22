@@ -1,10 +1,9 @@
 # Setting up Xdebug with Lagoon
 
-{% hint style="info" %}
-Note: amazee.io's base images are currently using Xdebug v2, and will be upgraded soon. You can [keep track on this issue](https://github.com/uselagoon/lagoon-images/issues/40). 
+!!! Note "Note:"
+	Note: amazee.io's base images are currently using Xdebug v2, and will be upgraded soon. You can [keep track on this issue](https://github.com/uselagoon/lagoon-images/issues/40).
 
-Xdebug v3 changed the default `remote_port`/`client_port` from 9000 to 9003. If you're using amazee.io's v2 images and generate a fresh debug config in VSCode, it will be Xdebug v3 and your defaults won't match. 
-{% endhint %}
+Xdebug v3 changed the default `remote_port`/`client_port` from 9000 to 9003. If you're using amazee.io's v2 images and generate a fresh debug config in VSCode, it will be Xdebug v3 and your defaults won't match.
 
 ##  Enable Xdebug Extension
 

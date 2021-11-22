@@ -101,3 +101,5 @@ markdown_extensions:
       baselevel: 1
   - fenced_code
   - admonition
+
+extra_css: [extra.css]

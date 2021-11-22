@@ -34,9 +34,8 @@ If you have any questions, reach out to us on RocketChat!
 
 We take security very seriously. If you discover a security issue or think you found one, please bring it to the maintainers' attention.
 
-{% hint style="danger" %}
-Please send your findings to [hello@amazee.io](mailto:hello@amazee.io). Please **DO NOT** file a GitHub issue for them.
-{% endhint %}
+!!! Danger "Danger:"
+	Please send your findings to [hello@amazee.io](mailto:hello@amazee.io). Please **DO NOT** file a GitHub issue for them.
 
 Security reports are greatly appreciated and will receive public karma and swag! We're also working on a Bug Bounty system.
 

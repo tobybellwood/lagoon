@@ -87,9 +87,8 @@ To set a static port, edit your service definition in your `docker-compose.yml`.
 {% endtab %}
 {% endtabs %}
 
-{% hint style="warning" %}
+!!! warning "Warning:"
 By setting a static port you become responsible for managing port collisions.
-{% endhint %}
 
 ### Connect to MySQL
 

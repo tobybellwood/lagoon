@@ -4,11 +4,10 @@ description: Lagoon supports deploytarget configurations, which are used to allo
 
 # DeployTarget Configurations
 
-{% hint style="danger" %}
-This is an alpha feature in Lagoon.
+!!! Danger "Danger:"
+	This is an alpha feature in Lagoon.
 The way DeployTarget Configurations work could change in future releases.
 If you decide to use this feature, you do at your own risk.
-{% endhint %}
 
 DeployTarget Configurations are a way to define how a project can deploy to multiple clusters. This feature is useful when you have two clusters, one which could be dedicated for running Production workloads, and another that is used for running Development workloads.
 
@@ -70,9 +69,8 @@ mutation addDeployTargetConfig{
   }
 }
 ```
-{% hint style="info" %}
-`deployTarget` is an alias to openshift or kubernetes ID in the Lagoon API
-{% endhint %}
+!!! Note "Note:"
+	`deployTarget` is an alias to openshift or kubernetes ID in the Lagoon API
 
 It is also possible to configure multiple DeployTarget configurations.
 
