@@ -6,3 +6,6 @@ controller:
       https: "32443"
   config:
     proxy-body-size: 100m
+  watchIngressWithoutClass: true
+  ingressClassResource:
+    default: true

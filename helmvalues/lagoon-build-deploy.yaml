@@ -7,10 +7,10 @@ taskSSHPort: 2020
 taskAPIHost: http://lagoon-core-api.lagoon.svc:80
 
 image:
-  repository: amazeeio/lagoon-builddeploy
-  tag: v0.1.15
+  repository: uselagoon/remote-controller
+  tag: k8s_122
 
-overrideBuildDeployImage: uselagoon/kubectl-build-deploy-dind:latest
+overrideBuildDeployImage: testlagoon/kubectl-build-deploy-dind:pr-2815
 
 # rootlessBuildPods: true
 # lagoonFeatureFlagDefaultRootlessWorkload: $(LAGOON_FEATURE_FLAG_DEFAULT_ROOTLESS_WORKLOAD)

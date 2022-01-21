@@ -22,6 +22,9 @@ lagoon-gatekeeper:
 
 mxoutHost: mxout1.example.com
 
+dioscuri:
+  enabled: false
+
 dbaas-operator:
   enabled: true
   image:

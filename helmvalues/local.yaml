@@ -34,7 +34,11 @@ postgresqlPassword: ba7ees3aiy0eiNai
 lagoon-build-deploy:
   enabled: false
 
+dioscuri:
+  enabled: false
+
 dbaas-operator:
+  enabled: false
   mariadbProviders:
     development:
       password: ba7ees3aiy0eiNai
@@ -64,7 +68,7 @@ tests:
   #   tag: main
   tests:
     # - active-standby-kubernetes
-    # - api
+    - api
     # - bitbucket
     # - dbaas
     # - deploytarget
@@ -80,7 +84,7 @@ tests:
     # - github
     # - gitlab
     # - image-cache
-    - nginx
+    # - nginx
     # - node-mongodb
     # - node-various
     # - node

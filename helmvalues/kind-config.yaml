@@ -11,7 +11,6 @@ containerdConfigPatches:
     endpoint = ["https://imagecache.amazeeio.cloud", "https://index.docker.io/v1/"]
 nodes:
 - role: control-plane
-  image: kindest/node:v1.21.1@sha256:69860bda5563ac81e3c0057d654b5253219618a22ec3a346306239bba8cfa1a6
   extraMounts:
   - containerPath: /var/lib/kubelet/config.json
     hostPath: ~/.docker/config.json
