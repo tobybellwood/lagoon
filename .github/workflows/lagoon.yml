@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kindest_node_version: [v1.22.0]
+        kindest_node_version: [v1.21.1]
         experimental: [false]
         # include:
         #   - kindest_node_version: v1.22.0
@@ -46,6 +46,7 @@ jobs:
     - name: Check config
       run: |
         cat helmvalues/kind-config.yaml
+        kubectl version
     - name: Create kind cluster
       uses: helm/kind-action@v1.2.0
       with:
@@ -90,8 +91,9 @@ jobs:
       run: |
         helm test lagoon-test --namespace lagoon --logs --timeout 30m
 #        timeout 10m kubectl logs -f -l app.kubernetes.io/instance=lagoon-test -n lagoon
-    - name: Test
+    - name: Get cluster info
       run: |
         kubectl cluster-info
         kubectl get pods -A
         kubectl get ingress -A
+        helm ls -aA
