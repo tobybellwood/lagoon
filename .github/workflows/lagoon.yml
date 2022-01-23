@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kindest_node_version: [v1.21.1]
+        kindest_node_version: [v1.22.0]
         experimental: [false]
         # include:
         #   - kindest_node_version: v1.22.0
@@ -54,7 +54,6 @@ jobs:
         wait: 120s
     - name: Configure Helm repositories
       run: |
-        kubectl version
         helm plugin install https://github.com/aslafy-z/helm-git
         helm repo add harbor https://helm.goharbor.io
         helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
