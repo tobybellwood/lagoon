@@ -36,7 +36,6 @@ make logs service=webhook-handler
 ```
 
 Sometimes you will want to see what is happening inside of [Jenkins](https://jenkins.io/doc/). Your Jenkins instance can be found here:
-
 <!-- markdown-link-check-disable-next-line -->
 [http://localhost:8888/](http://localhost:8888/) \(`admin`:`admin`\)
 
@@ -58,4 +57,3 @@ The tests can be found here:
 
 * `develop` branch: [https://lagoon-ci.amazeeio.cloud/blue/organizations/jenkins/lagoon/activity/?branch=develop](https://lagoon-ci.amazeeio.cloud/blue/organizations/jenkins/lagoon/activity/?branch=develop)
 * `main` branch: [https://lagoon-ci.amazeeio.cloud/blue/organizations/jenkins/lagoon/activity/?branch=main](https://lagoon-ci.amazeeio.cloud/blue/organizations/jenkins/lagoon/activity/?branch=main)
-
