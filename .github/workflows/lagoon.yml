@@ -94,6 +94,10 @@ jobs:
       run: |
         helm test lagoon-test --namespace lagoon --logs --timeout 30m
 #        timeout 10m kubectl logs -f -l app.kubernetes.io/instance=lagoon-test -n lagoon
+    - name: Run dbaas and drush ests
+      run: |
+        helm upgrade --install --create-namespace --namespace lagoon --wait --timeout 10m lagoon-test lagoon/lagoon-test -f helmvalues/lagoon-test.yaml -f helmvalues/local.yaml --set tests.tests="{dbaas,drush}"
+        helm test lagoon-test --namespace lagoon --logs --timeout 30m
     - name: Inspect lagoon-remote pods if failed
       if: failure()
       run: |
