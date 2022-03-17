@@ -7,15 +7,15 @@ webhookHost: lagoon-core-webhook-handler
 
 localGit:
   image:
-    repository: uselagoon/local-git
+    repository: testlagoon/local-git
 
 localAPIDataWatcherPusher:
   image:
-    repository: uselagoon/local-api-data-watcher-pusher
+    repository: testlagoon/local-api-data-watcher-pusher
 
 tests:
   image:
-    repository: uselagoon/tests
+    repository: testlagoon/tests
   tests:
     - nginx
 

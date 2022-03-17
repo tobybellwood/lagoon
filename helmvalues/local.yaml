@@ -1,5 +1,10 @@
 #lagoon-core
-imageTag: v2.4.1
+imageTag: main
+insightsHandler:
+  enabled: true
+  # image:
+  #   repository: registry.172.17.0.2.nip.io:32080/library/lagoon/insights-handler
+  #   tag: latest
 # api:
 #   image:
 #     repository: registry.172.17.0.2.nip.io:32080/library/lagoon/api
@@ -31,9 +36,9 @@ imageTag: v2.4.1
 #     repository: registry.172.17.0.2.nip.io:32080/library/lagoon/webhooks2tasks
 #     tag: latest
 
-
 # lagoon-build-deploy
-overrideBuildDeployImage: uselagoon/kubectl-build-deploy-dind:latest
+overrideBuildDeployImage: testlagoon/kubectl-build-deploy-dind:main
+lagoonFeatureFlagForceInsights: enabled
 # overrideBuildDeployImage: registry.172.17.0.2.nip.io:32080/library/lagoon/kubectl-build-deploy-dind:latest
 
 # This sets the same password in the lagoon-core-broker and lagoon-build-deploy to allow them to communicate
@@ -63,9 +68,11 @@ dbaas-operator:
 #   image:
 #     repository: registry.172.17.0.2.nip.io:32080/library/lagoon/docker-host
 #     tag: latest
-
+lagoon-insights-remote:
+  enabled: true
+  rabbitMQPassword: xogie5lae8IoshugahcoeThakiequo3I
 # lagoon-test uses this
-token: eyJhbGciOiJSUzI1NiIsImtpZCI6IlQwWExwRklRd2M1TkVYWFVmZ2JMYjNwZ1ZXa2w3MEo1VDloZ1BpZUpTQVkifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJsYWdvb24iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoibGFnb29uLWJ1aWxkLWRlcGxveS10b2tlbi04d2hiZiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJsYWdvb24tYnVpbGQtZGVwbG95Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiZTBmYmY4YmQtNDFlNS00MmI3LWIzN2MtZDg5YjM4YWE1ZDMyIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmxhZ29vbjpsYWdvb24tYnVpbGQtZGVwbG95In0.Y9zB4V0jW7trfUC_1mp9YbUFeOFUVOA7EQu5B2Z9TT8-gGFxr411l9Vwjp294YSOX35TFRaISdac3uRnf2Oe2smn6cpzC3rPzfnyexcTw5dFAW-VxY4uq40gSOC0E_KATWVdM7wZRustpXis0WDhH4fp5TayXFC9xP3TJH4ddqMq01_lHN-sJbrVsxW3mAw3f1xCBxha1lkArXDL-o7b_SjaZ4DD6WngR9l_AtjxdhpltE1h-Fa_saEMaeigpnTWZSrTK2acI9JNbz3t2urMJ7BHhwMx0tcSJH-3qru-DV7__qaSsLwnTVtsi57k0aCBhbnWcyUTCLo6IkOERn_jEg
+token: eyJhbGciOiJSUzI1NiIsImtpZCI6Ii10UGdhME9kVk5JYkN3c0U3Nlp2RkkxWFdxdDBjODN5RmcyUEVLS0RZbmcifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJsYWdvb24iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoibGFnb29uLWJ1aWxkLWRlcGxveS10b2tlbi1iN2M3ZyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJsYWdvb24tYnVpbGQtZGVwbG95Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiMmQ0NDhiZTMtOGI2ZS00ZTRmLWI3NjgtMTNkYjdlY2M3M2UwIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmxhZ29vbjpsYWdvb24tYnVpbGQtZGVwbG95In0.f3spslDWDeEXK4OFkFungF1rQHwScLlbFCoAM2OrZuI13sXXsSfpzPhNzyHx7DVyLPGeJd67_p5e4t04Tk_9QsdibGhZ7NnH1eqXSpN7BhlNcYKcjdGXdzTz1H_FIMQl3EofJHw-mz3vthAzx2AGPelOBtCdJup1hRq6JL7N541I3gszRqnbOeTa52be674enEex_01m-PYGyFBy1P_TTz7MreRvKeGjmJ7uAYaeB_7gIAhEr-JUBIP4yWlZrC9N37RclCfk1limToIv2t25ZvmYRHhJsaqi2f5yGL_Qh2ZhkUzrCJ9mYqZGCJfE-zj15NXikWzC7-_3Gn6DgLFY1w
 # localGit:
 #   image:
 #     repository: testlagoon/local-git
@@ -84,6 +91,7 @@ tests:
     # - active-standby-kubernetes
     # - api
     # - bitbucket
+    # - bulkdeployment
     # - dbaas
     # - deploytarget
     # - drupal-php74
@@ -104,3 +112,4 @@ tests:
     # - node
     # - python
     # - tasks
+    # - workflows

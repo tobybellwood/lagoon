@@ -11,9 +11,15 @@ lagoon-build-deploy:
 dockerHost:
   registry: registry.172.17.0.2.nip.io:32080
   image:
-    repository: uselagoon/docker-host
+    repository: testlagoon/docker-host
   storage:
     size: 50Gi
+
+lagoon-insights-remote:
+  enabled: false
+  rabbitMQUsername: lagoon
+  rabbitMQPassword: ci
+  rabbitMQHostname: lagoon-core-broker
 
 imageTag: ""
 
