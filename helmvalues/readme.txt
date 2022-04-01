@@ -1,14 +1,22 @@
 
 # These steps assume you have tools like helm, kubectl etc all installed.
 
-# Find the IP address for the KinD network - replace this in all the helmvalues files (should be 172.17.0.2 or similar)
-docker network create kind || true && docker run --rm --network kind alpine ip -o addr show eth0 | sed -nE 's/.* ([0-9.]{7,})\/.*/\1/p'
+# Find the IP address for the network - replace this in all the helmvalues files (may be 192.168.1.51 or similar)
+
+    If it's KinD:
+    docker network create kind || true && docker run --rm --network kind alpine ip -o addr show eth0 | sed -nE 's/.* ([0-9.]{7,})\/.*/\1/p'
+
+    If it's Microk8s:
+    (see section at bottom)
 
 # e.g. sample replace command - use the output from above in the second half of the sed command below
-find ./helmvalues -type f | xargs sed -i "s/172.17.0.2/172.17.0.2/g"
+find ./helmvalues -type f | xargs sed -i "s/172.17.0.2/192.168.1.51/g"
 
-# Create the cluster
-kind create cluster --wait=120s --config=helmvalues/kind-config.yaml
+    # Create the cluster - KinD
+    kind create cluster --wait=120s --config=helmvalues/kind-config.yaml
+
+    # Create the cluster - Microk8s
+    (see section at bottom)
 
 # Optional Set up kubectx and kubens (or similar) - if you have these tools
 kubectx kind-lagoon-local && kubens default
@@ -39,6 +47,12 @@ helm upgrade --install --create-namespace --namespace mongodb --wait --timeout 3
 helm upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-core lagoon/lagoon-core -f helmvalues/lagoon-core.yaml -f helmvalues/local.yaml
 helm upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-build-deploy lagoon/lagoon-build-deploy -f helmvalues/lagoon-build-deploy.yaml -f helmvalues/local.yaml
 helm upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-remote lagoon/lagoon-remote -f helmvalues/lagoon-remote.yaml -f helmvalues/local.yaml
+
+# Install any additional tooling
+helm upgrade --install --create-namespace --namespace gitea --wait --timeout 30m gitea gitea-charts/gitea -f helmvalues/gitea.yaml
+
+# To install a component from the local lagoon-charts (e.g lagoon-core)
+helm upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-core ../lagoon-charts/charts/lagoon-core -f helmvalues/lagoon-core.yaml -f helmvalues/local.yaml
 
 # Need a token installed into the tests charts to allow it to talk to core
 kubectl -n lagoon get secret -o json | jq -r '.items[] | select(.metadata.name | match("lagoon-build-deploy-token")) | .data.token | @base64d' | xargs -I ARGS yq -i eval '.token = "ARGS"' helmvalues/local.yaml

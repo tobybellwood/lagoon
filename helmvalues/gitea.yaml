@@ -1,0 +1,21 @@
+gitea:
+  admin:
+    username: "admin"
+    password: "Gitea12345"
+    email: "gitea@example.com"
+  config:
+    server:
+      SSH_DOMAIN: gitea-ssh.gitea.svc.cluster.local
+      ROOT_URL: http://gitea.172.17.0.2.nip.io:32080
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: gitea.172.17.0.2.nip.io
+      paths:
+      - path: /
+        pathType: Prefix
+
+
