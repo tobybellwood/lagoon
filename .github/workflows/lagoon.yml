@@ -117,7 +117,7 @@ jobs:
       if: failure()
       run: |
         kubectl describe pods --namespace=lagoon --selector=app.kubernetes.io/name=lagoon-test
-        kubectl logs --tail=-1 --namespace=lagoon --prefix --timestamps --all-containers --selector=app.kubernetes.io/name=test
+        kubectl logs --tail=-1 --namespace=lagoon --prefix --timestamps --all-containers --selector=app.kubernetes.io/name=lagoon-test
     - name: Get cluster info
       run: |
         kubectl cluster-info
