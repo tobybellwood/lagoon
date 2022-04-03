@@ -97,7 +97,7 @@ jobs:
     - name: Run dbaas tests
       run: |
         helm upgrade --install --create-namespace --namespace lagoon --wait --timeout 10m lagoon-test lagoon/lagoon-test -f helmvalues/lagoon-test.yaml -f helmvalues/local.yaml --set tests.tests="{dbaas}"
-        helm test lagoon-test --namespace lagoon --logs --timeout 30m
+        helm test lagoon-test --namespace lagoon --logs --timeout 60m
     - name: Inspect lagoon-remote pods if failed
       if: failure()
       run: |
