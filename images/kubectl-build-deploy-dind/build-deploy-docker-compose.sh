@@ -76,6 +76,10 @@ function featureFlag() {
 	echo "${!defaultFlagVar}"
 }
 
+set +x
+SCC_CHECK=$(kubectl -n ${NAMESPACE} get pod ${LAGOON_BUILD_NAME} -o json | jq -r '.metadata.annotations."openshift.io/scc" // false')
+set -x
+
 function patchBuildStep() {
   [ "$1" ] || return #total start time
   [ "$2" ] || return #step start time
@@ -99,11 +103,13 @@ function patchBuildStep() {
   echo "##############################################"
 
   # patch the buildpod with the buildstep
-  kubectl patch --insecure-skip-tls-verify -n ${4} pod ${LAGOON_BUILD_NAME} \
-    -p "{\"metadata\":{\"labels\":{\"lagoon.sh/buildStep\":\"${5}\"}}}"
+  if [ "${SCC_CHECK}" == false ]; then
+    kubectl patch -n ${4} pod ${LAGOON_BUILD_NAME} \
+      -p "{\"metadata\":{\"labels\":{\"lagoon.sh/buildStep\":\"${5}\"}}}"
 
-  # tiny sleep to allow patch to complete before logs roll again
-  sleep 0.5s
+    # tiny sleep to allow patch to complete before logs roll again
+    sleep 0.5s
+  fi
 }
 
 ##############################################
@@ -121,21 +127,21 @@ set -x
 
 set +x
 echo "Updating lagoon-yaml configmap with a pre-deploy version of the .lagoon.yml file"
-if kubectl --insecure-skip-tls-verify -n ${NAMESPACE} get configmap lagoon-yaml &> /dev/null; then
+if kubectl -n ${NAMESPACE} get configmap lagoon-yaml &> /dev/null; then
   # replace it
   # if the environment has already been deployed with an existing configmap that had the file in the key `.lagoon.yml`
   # just nuke the entire configmap and replace it with our new key and file
-  LAGOON_YML_CM=$(kubectl --insecure-skip-tls-verify -n ${NAMESPACE} get configmap lagoon-yaml -o json)
+  LAGOON_YML_CM=$(kubectl -n ${NAMESPACE} get configmap lagoon-yaml -o json)
   if [ "$(echo ${LAGOON_YML_CM} | jq -r '.data.".lagoon.yml" // false')" == "false" ]; then
     # if the key doesn't exist, then just update the pre-deploy yaml only
-    kubectl --insecure-skip-tls-verify -n ${NAMESPACE} get configmap lagoon-yaml -o json | jq --arg add "`cat .lagoon.yml`" '.data."pre-deploy" = $add' | kubectl apply -f -
+    kubectl -n ${NAMESPACE} get configmap lagoon-yaml -o json | jq --arg add "`cat .lagoon.yml`" '.data."pre-deploy" = $add' | kubectl apply -f -
   else
     # if the key does exist, then nuke it and put the new key
-    kubectl --insecure-skip-tls-verify -n ${NAMESPACE} create configmap lagoon-yaml --from-file=pre-deploy=.lagoon.yml -o yaml --dry-run=client | kubectl replace -f -
+    kubectl -n ${NAMESPACE} create configmap lagoon-yaml --from-file=pre-deploy=.lagoon.yml -o yaml --dry-run=client | kubectl replace -f -
   fi
  else
   # create it
-  kubectl --insecure-skip-tls-verify -n ${NAMESPACE} create configmap lagoon-yaml --from-file=pre-deploy=.lagoon.yml
+  kubectl -n ${NAMESPACE} create configmap lagoon-yaml --from-file=pre-deploy=.lagoon.yml
 fi
 set -x
 
@@ -187,7 +193,6 @@ HELM_ARGUMENTS=()
 for CAPABILITIES in "${CAPABILITIES[@]}"; do
   HELM_ARGUMENTS+=(-a "${CAPABILITIES}")
 done
-set -x
 
 # Implement global default values for backup retention periods
 if [ -z "$MONTHLY_BACKUP_DEFAULT_RETENTION" ]
@@ -329,9 +334,9 @@ do
   if [ "$SERVICE_TYPE" == "mariadb" ]; then
     # if there is already a service existing with the service_name we assume that for this project there has been a
     # mariadb-single deployed (probably from the past where there was no mariadb-shared yet, or mariadb-dbaas) and use that one
-    if kubectl --insecure-skip-tls-verify -n ${NAMESPACE} get service "$SERVICE_NAME" &> /dev/null; then
+    if kubectl -n ${NAMESPACE} get service "$SERVICE_NAME" &> /dev/null; then
       SERVICE_TYPE="mariadb-single"
-    elif [[ checkDBaaSHealth ]]; then
+    elif checkDBaaSHealth; then
       # check if the dbaas operator responds to a health check
       # if it does, then check if the dbaas operator has a provider matching the provider type that is expected
       if checkDBaaSProvider mariadb $(getDBaaSEnvironment mariadb-dbaas); then
@@ -339,7 +344,7 @@ do
       else
         SERVICE_TYPE="mariadb-single"
       fi
-    elif [[ "${CAPABILITIES[@]}" =~ "mariadb.amazee.io/v1/MariaDBConsumer" ]] && [[ ! checkDBaaSHealth ]]; then
+    elif [[ "${CAPABILITIES[@]}" =~ "mariadb.amazee.io/v1/MariaDBConsumer" ]] && ! checkDBaaSHealth ; then
       # check if this cluster supports the default one, if not we assume that this cluster is not capable of shared mariadbs and we use a mariadb-single
       # real basic check to see if the mariadbconsumer exists as a kind
       SERVICE_TYPE="mariadb-dbaas"
@@ -367,9 +372,9 @@ do
   if [ "$SERVICE_TYPE" == "postgres" ]; then
     # if there is already a service existing with the service_name we assume that for this project there has been a
     # postgres-single deployed (probably from the past where there was no postgres-shared yet, or postgres-dbaas) and use that one
-    if kubectl --insecure-skip-tls-verify -n ${NAMESPACE} get service "$SERVICE_NAME" &> /dev/null; then
+    if kubectl -n ${NAMESPACE} get service "$SERVICE_NAME" &> /dev/null; then
       SERVICE_TYPE="postgres-single"
-    elif [[ checkDBaaSHealth ]]; then
+    elif checkDBaaSHealth; then
       # check if the dbaas operator responds to a health check
       # if it does, then check if the dbaas operator has a provider matching the provider type that is expected
       if checkDBaaSProvider postgres $(getDBaaSEnvironment postgres-dbaas); then
@@ -379,7 +384,7 @@ do
       fi
     # heck if this cluster supports the default one, if not we assume that this cluster is not capable of shared PostgreSQL and we use a postgres-single
     # real basic check to see if the postgreSQLConsumer exists as a kind
-    elif [[ "${CAPABILITIES[@]}" =~ "postgres.amazee.io/v1/PostgreSQLConsumer" ]]; then
+    elif [[ "${CAPABILITIES[@]}" =~ "postgres.amazee.io/v1/PostgreSQLConsumer" ]] && ! checkDBaaSHealth; then
       SERVICE_TYPE="postgres-dbaas"
     else
       SERVICE_TYPE="postgres-single"
@@ -405,19 +410,19 @@ do
   if [ "$SERVICE_TYPE" == "mongo" ]; then
     # if there is already a service existing with the service_name we assume that for this project there has been a
     # mongodb-single deployed (probably from the past where there was no mongodb-shared yet, or mongodb-dbaas) and use that one
-    if kubectl --insecure-skip-tls-verify -n ${NAMESPACE} get service "$SERVICE_NAME" &> /dev/null; then
+    if kubectl -n ${NAMESPACE} get service "$SERVICE_NAME" &> /dev/null; then
       SERVICE_TYPE="mongodb-single"
-    elif [[ checkDBaaSHealth ]]; then
+    elif checkDBaaSHealth; then
       # check if the dbaas operator responds to a health check
       # if it does, then check if the dbaas operator has a provider matching the provider type that is expected
-      if checkDBaaSProvider postgres $(getDBaaSEnvironment mongodb-dbaas); then
+      if checkDBaaSProvider mongodb $(getDBaaSEnvironment mongodb-dbaas); then
         SERVICE_TYPE="mongodb-dbaas"
       else
         SERVICE_TYPE="mongodb-single"
       fi
     # heck if this cluster supports the default one, if not we assume that this cluster is not capable of shared MongoDB and we use a mongodb-single
     # real basic check to see if the MongoDBConsumer exists as a kind
-    elif [[ "${CAPABILITIES[@]}" =~ "mongodb.amazee.io/v1/MongoDBConsumer" ]]; then
+    elif [[ "${CAPABILITIES[@]}" =~ "mongodb.amazee.io/v1/MongoDBConsumer" ]] && ! checkDBaaSHealth; then
       SERVICE_TYPE="mongodb-dbaas"
     else
       SERVICE_TYPE="mongodb-single"
@@ -494,7 +499,7 @@ set -x
 ##############################################
 
 LAGOON_CACHE_BUILD_ARGS=()
-readarray LAGOON_CACHE_BUILD_ARGS < <(kubectl --insecure-skip-tls-verify -n ${NAMESPACE} get deployments -o yaml -l 'lagoon.sh/service' | yq e '.items[].spec.template.spec.containers[].image | capture("^(?P<image>.+\/.+\/.+\/(?P<name>.+)\@.*)$") | "LAGOON_CACHE_" + .name + "=" + .image' -)
+readarray LAGOON_CACHE_BUILD_ARGS < <(kubectl -n ${NAMESPACE} get deployments -o yaml -l 'lagoon.sh/service' | yq e '.items[].spec.template.spec.containers[].image | capture("^(?P<image>.+\/.+\/.+\/(?P<name>.+)\@.*)$") | "LAGOON_CACHE_" + .name + "=" + .image' -)
 
 
 
@@ -739,9 +744,12 @@ for i in $ROUTES_AUTOGENERATE_PREFIXES; do yq3 write -i -- /kubectl-build-deploy
 yq3 write -i -- /kubectl-build-deploy/values.yaml 'kubernetes' $KUBERNETES
 yq3 write -i -- /kubectl-build-deploy/values.yaml 'lagoonVersion' $LAGOON_VERSION
 # check for ROOTLESS_WORKLOAD feature flag, disabled by default
+
+set +x
 if [ "$(featureFlag ROOTLESS_WORKLOAD)" = enabled ]; then
 	yq3 merge -ix -- /kubectl-build-deploy/values.yaml /kubectl-build-deploy/rootless.values.yaml
 fi
+set -x
 
 
 echo -e "\
@@ -1091,7 +1099,7 @@ if [[ "${CAPABILITIES[@]}" =~ "backup.appuio.ch/v1alpha1/Schedule" ]]; then
       HELM_CUSTOM_BAAS_BACKUP_SECRET_KEY=${BAAS_CUSTOM_BACKUP_SECRET_KEY}
     else
       set +x
-      kubectl --insecure-skip-tls-verify -n ${NAMESPACE} delete secret baas-custom-backup-credentials --ignore-not-found
+      kubectl -n ${NAMESPACE} delete secret baas-custom-backup-credentials --ignore-not-found
       set -x
     fi
   fi
@@ -1108,15 +1116,15 @@ if [[ "${CAPABILITIES[@]}" =~ "backup.appuio.ch/v1alpha1/Schedule" ]]; then
       HELM_CUSTOM_BAAS_RESTORE_SECRET_KEY=${BAAS_CUSTOM_RESTORE_SECRET_KEY}
     else
       set +x
-      kubectl --insecure-skip-tls-verify -n ${NAMESPACE} delete secret baas-custom-restore-credentials --ignore-not-found
+      kubectl -n ${NAMESPACE} delete secret baas-custom-restore-credentials --ignore-not-found
       set -x
     fi
   fi
 
-  if ! kubectl --insecure-skip-tls-verify -n ${NAMESPACE} get secret baas-repo-pw &> /dev/null; then
+  if ! kubectl -n ${NAMESPACE} get secret baas-repo-pw &> /dev/null; then
     # Create baas-repo-pw secret based on the project secret
     set +x
-    kubectl --insecure-skip-tls-verify -n ${NAMESPACE} create secret generic baas-repo-pw --from-literal=repo-pw=$(echo -n "$PROJECT_SECRET-BAAS-REPO-PW" | sha256sum | cut -d " " -f 1)
+    kubectl -n ${NAMESPACE} create secret generic baas-repo-pw --from-literal=repo-pw=$(echo -n "$PROJECT_SECRET-BAAS-REPO-PW" | sha256sum | cut -d " " -f 1)
     set -x
   fi
 
@@ -1220,16 +1228,18 @@ if [[ "${CAPABILITIES[@]}" =~ "backup.appuio.ch/v1alpha1/Schedule" ]]; then
 fi
 
 # check for ISOLATION_NETWORK_POLICY feature flag, disabled by default
+set +x
 if [ "$(featureFlag ISOLATION_NETWORK_POLICY)" = enabled ]; then
 	# add namespace isolation network policy to deployment
 	helm template isolation-network-policy /kubectl-build-deploy/helmcharts/isolation-network-policy \
 		-f /kubectl-build-deploy/values.yaml \
 		> $YAML_FOLDER/isolation-network-policy.yaml
 fi
+set -x
 
 if [ "$(ls -A $YAML_FOLDER/)" ]; then
   find $YAML_FOLDER -type f -exec cat {} \;
-  kubectl apply --insecure-skip-tls-verify -n ${NAMESPACE} -f $YAML_FOLDER/
+  kubectl apply -n ${NAMESPACE} -f $YAML_FOLDER/
 fi
 
 set +x
@@ -1288,7 +1298,7 @@ if [ ! -z "$LAGOON_PROJECT_VARIABLES" ]; then
   HAS_PROJECT_RUNTIME_VARS=$(echo $LAGOON_PROJECT_VARIABLES | jq -r 'map( select(.scope == "runtime" or .scope == "global") )')
 
   if [ ! "$HAS_PROJECT_RUNTIME_VARS" = "[]" ]; then
-    kubectl patch --insecure-skip-tls-verify \
+    kubectl patch \
       -n ${NAMESPACE} \
       configmap lagoon-env \
       -p "{\"data\":$(echo $LAGOON_PROJECT_VARIABLES | jq -r 'map( select(.scope == "runtime" or .scope == "global") ) | map( { (.name) : .value } ) | add | tostring')}"
@@ -1298,7 +1308,7 @@ if [ ! -z "$LAGOON_ENVIRONMENT_VARIABLES" ]; then
   HAS_ENVIRONMENT_RUNTIME_VARS=$(echo $LAGOON_ENVIRONMENT_VARIABLES | jq -r 'map( select(.scope == "runtime" or .scope == "global") )')
 
   if [ ! "$HAS_ENVIRONMENT_RUNTIME_VARS" = "[]" ]; then
-    kubectl patch --insecure-skip-tls-verify \
+    kubectl patch \
       -n ${NAMESPACE} \
       configmap lagoon-env \
       -p "{\"data\":$(echo $LAGOON_ENVIRONMENT_VARIABLES | jq -r 'map( select(.scope == "runtime" or .scope == "global") ) | map( { (.name) : .value } ) | add | tostring')}"
@@ -1307,7 +1317,7 @@ fi
 set -x
 
 if [ "$BUILD_TYPE" == "pullrequest" ]; then
-  kubectl patch --insecure-skip-tls-verify \
+  kubectl patch \
     -n ${NAMESPACE} \
     configmap lagoon-env \
     -p "{\"data\":{\"LAGOON_PR_HEAD_BRANCH\":\"${PR_HEAD_BRANCH}\", \"LAGOON_PR_BASE_BRANCH\":\"${PR_BASE_BRANCH}\", \"LAGOON_PR_TITLE\":$(echo $PR_TITLE | jq -R)}}"
@@ -1347,7 +1357,7 @@ done
 ### REDEPLOY DEPLOYMENTS IF CONFIG MAP CHANGES
 ##############################################
 
-CONFIG_MAP_SHA=$(kubectl --insecure-skip-tls-verify -n ${NAMESPACE} get configmap lagoon-env -o yaml | shyaml get-value data | sha256sum | awk '{print $1}')
+CONFIG_MAP_SHA=$(kubectl -n ${NAMESPACE} get configmap lagoon-env -o yaml | shyaml get-value data | sha256sum | awk '{print $1}')
 # write the configmap to the values file so when we `exec-kubectl-resources-with-images.sh` the deployments will get the value of the config map
 # which will cause a change in the deployment and trigger a rollout if only the configmap has changed
 yq3 write -i -- /kubectl-build-deploy/values.yaml 'configMapSha' $CONFIG_MAP_SHA
@@ -1556,18 +1566,23 @@ set -x
 ### APPLY RESOURCES
 ##############################################
 
+set +x
 if [ "$(ls -A $YAML_FOLDER/)" ]; then
-
   if [ "$CI" == "true" ]; then
     # During CI tests of Lagoon itself we only have a single compute node, so we change podAntiAffinity to podAffinity
     find $YAML_FOLDER -type f  -print0 | xargs -0 sed -i s/podAntiAffinity/podAffinity/g
     # During CI tests of Lagoon itself we only have a single compute node, so we change ReadWriteMany to ReadWriteOnce
     find $YAML_FOLDER -type f  -print0 | xargs -0 sed -i s/ReadWriteMany/ReadWriteOnce/g
   fi
+  if [ "$(featureFlag RWX_TO_RWO)" = enabled ]; then
+    # If there is only a single compute node, this can be used to change RWX to RWO
+    find $YAML_FOLDER -type f  -print0 | xargs -0 sed -i s/ReadWriteMany/ReadWriteOnce/g
+  fi
 
   find $YAML_FOLDER -type f -exec cat {} \;
-  kubectl apply --insecure-skip-tls-verify -n ${NAMESPACE} -f $YAML_FOLDER/
+  kubectl apply -n ${NAMESPACE} -f $YAML_FOLDER/
 fi
+set -x
 
 ##############################################
 ### WAIT FOR POST-ROLLOUT TO BE FINISHED
@@ -1629,7 +1644,7 @@ do
     continue
   else
     #echo "Single cron missing: ${SINGLE_NATIVE_CRONJOB}"
-    kubectl --insecure-skip-tls-verify -n ${NAMESPACE} delete cronjob ${SINGLE_NATIVE_CRONJOB}
+    kubectl -n ${NAMESPACE} delete cronjob ${SINGLE_NATIVE_CRONJOB}
   fi
 done
 
@@ -1681,12 +1696,12 @@ set -x
 
 set +x
 echo "Updating lagoon-yaml configmap with a post-deploy version of the .lagoon.yml file"
-if kubectl --insecure-skip-tls-verify -n ${NAMESPACE} get configmap lagoon-yaml &> /dev/null; then
+if kubectl -n ${NAMESPACE} get configmap lagoon-yaml &> /dev/null; then
   # replace it, no need to check if the key is different, as that will happen in the pre-deploy phase
-  kubectl --insecure-skip-tls-verify -n ${NAMESPACE} get configmap lagoon-yaml -o json | jq --arg add "`cat .lagoon.yml`" '.data."post-deploy" = $add' | kubectl apply -f -
+  kubectl -n ${NAMESPACE} get configmap lagoon-yaml -o json | jq --arg add "`cat .lagoon.yml`" '.data."post-deploy" = $add' | kubectl apply -f -
  else
   # create it
-  kubectl --insecure-skip-tls-verify -n ${NAMESPACE} create configmap lagoon-yaml --from-file=post-deploy=.lagoon.yml
+  kubectl -n ${NAMESPACE} create configmap lagoon-yaml --from-file=post-deploy=.lagoon.yml
 fi
 set -x
 
@@ -1694,4 +1709,24 @@ set +x
 currentStepEnd="$(date +"%Y-%m-%d %H:%M:%S")"
 patchBuildStep "${buildStartTime}" "${previousStepEnd}" "${currentStepEnd}" "${NAMESPACE}" "deployCompleted" "Build and Deploy"
 previousStepEnd=${currentStepEnd}
+set -x
+
+set +x
+if [ "$(featureFlag INSIGHTS)" = enabled ]; then
+  ##############################################
+  ### RUN insights gathering and store in configmap
+  ##############################################
+
+  for IMAGE_NAME in "${!IMAGES_BUILD[@]}"
+  do
+
+    IMAGE_TAG="${IMAGE_TAG:-latest}"
+    IMAGE_FULL="${REGISTRY}/${PROJECT}/${ENVIRONMENT}/${IMAGE_NAME}:${IMAGE_TAG}"
+    . /kubectl-build-deploy/scripts/exec-generate-insights-configmap.sh
+  done
+
+  currentStepEnd="$(date +"%Y-%m-%d %H:%M:%S")"
+  patchBuildStep "${buildStartTime}" "${previousStepEnd}" "${currentStepEnd}" "${NAMESPACE}" "insightsCompleted" "Insights Gathering"
+  previousStepEnd=${currentStepEnd}
+fi
 set -x

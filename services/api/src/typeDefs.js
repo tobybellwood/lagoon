@@ -14,6 +14,9 @@ const typeDefs = gql`
   enum SshKeyType {
     SSH_RSA
     SSH_ED25519
+    ECDSA_SHA2_NISTP256
+    ECDSA_SHA2_NISTP384
+    ECDSA_SHA2_NISTP521
   }
 
   enum DeployType {
@@ -127,6 +130,7 @@ const typeDefs = gql`
     id: Int
     name: String
     type: String
+    range: [String]
     advancedTaskDefinition: AdvancedTaskDefinition
   }
 
@@ -157,6 +161,7 @@ const typeDefs = gql`
     environment: Int
     project: Int
     permission: TaskPermission
+    advancedTaskDefinitionArguments: [AdvancedTaskDefinitionArgument]
     created: String
     deleted: String
   }
@@ -177,6 +182,39 @@ const typeDefs = gql`
     created: String
     deleted: String
   }
+
+
+  type Workflow {
+    id: Int
+    name: String
+    event: String
+    project: Int
+    advancedTaskDefinition: AdvancedTaskDefinition
+  }
+
+  input AddWorkflowInput {
+    name: String
+    event: String
+    project: Int
+    advancedTaskDefinition: Int
+  }
+
+  input DeleteWorkflowInput {
+    id: Int!
+  }
+
+  input UpdateWorkflowPatchInput {
+    name: String
+    event: String
+    project: Int
+    advancedTaskDefinition: Int
+  }
+
+  input UpdateWorkflowInput {
+    id: Int!
+    patch: UpdateWorkflowPatchInput!
+  }
+
 
   type Problem {
     id: Int
@@ -265,6 +303,7 @@ const typeDefs = gql`
     type: FactType
     category: String
     references: [FactReference]
+    service: String
   }
 
   input AddFactInput {
@@ -277,6 +316,7 @@ const typeDefs = gql`
     keyFact: Boolean
     type: FactType
     category: String
+    service: String
   }
 
   input AddFactsInput {
@@ -292,6 +332,7 @@ const typeDefs = gql`
     keyFact: Boolean
     type: FactType
     category: String
+    service: String
   }
 
   input UpdateFactInput {
@@ -420,7 +461,7 @@ const typeDefs = gql`
     consoleUrl: String
     token: String
     routerPattern: String
-    projectUser: String
+    projectUser: String @deprecated(reason: "Not used with RBAC permissions")
     sshHost: String
     sshPort: String
     created: String
@@ -436,7 +477,7 @@ const typeDefs = gql`
     consoleUrl: String
     token: String
     routerPattern: String
-    projectUser: String
+    projectUser: String @deprecated(reason: "Not used with RBAC permissions")
     sshHost: String
     sshPort: String
     created: String
@@ -610,6 +651,14 @@ const typeDefs = gql`
     """
     standbyAlias: String
     """
+    What the production environment build priority should be (\`0 through 10\`)
+    """
+    productionBuildPriority: Int
+    """
+    What the development environment build priority should be (\`0 through 10\`)
+    """
+    developmentBuildPriority: Int
+    """
     Should this project have auto idling enabled (\`1\` or \`0\`)
     """
     autoIdle: Int
@@ -781,11 +830,12 @@ const typeDefs = gql`
     advancedTasks: [AdvancedTaskDefinition]
     services: [EnvironmentService]
     problems(severity: [ProblemSeverityRating], source: [String]): [Problem]
-    facts(keyFacts: Boolean, limit: Int): [Fact]
+    facts(keyFacts: Boolean, limit: Int, summary: Boolean): [Fact]
     openshift: Openshift
     openshiftProjectPattern: String
     kubernetes: Kubernetes
     kubernetesNamespacePattern: String
+    workflows: [Workflow]
   }
 
   type EnvironmentHitsMonth {
@@ -847,6 +897,9 @@ const typeDefs = gql`
     The Lagoon URL
     """
     uiLink: String
+    priority: Int
+    bulkId: String
+    bulkName: String
   }
 
   type EnvKeyValue {
@@ -1010,6 +1063,7 @@ const typeDefs = gql`
       kubernetesNamespaceName: String
     ): Environment
     deploymentByRemoteId(id: String): Deployment
+    deploymentsByBulkId(bulkId: String): [Deployment]
     taskByRemoteId(id: String): Task
     taskById(id: Int): Task
     """
@@ -1069,6 +1123,12 @@ const typeDefs = gql`
     Returns a AdvancedTaskDefinitionArgument by Id
     """
     advancedTaskDefinitionArgumentById(id: Int!) : [AdvancedTaskDefinitionArgument]
+
+    """
+    Returns all Workflows for an environment
+    """
+    workflowsForEnvironment(environment: Int!) : [Workflow]
+
     """
     Returns the DeployTargetConfig by a deployTargetConfig Id
     """
@@ -1150,6 +1210,8 @@ const typeDefs = gql`
     privateKey: String
     problemsUi: Int
     factsUi: Int
+    productionBuildPriority: Int
+    developmentBuildPriority: Int
     deploymentsDisabled: Int
   }
 
@@ -1222,6 +1284,9 @@ const typeDefs = gql`
     completed: String
     environment: Int!
     remoteId: String
+    priority: Int
+    bulkId: String
+    bulkName: String
   }
 
   input DeleteDeploymentInput {
@@ -1236,6 +1301,9 @@ const typeDefs = gql`
     completed: String
     environment: Int
     remoteId: String
+    priority: Int
+    bulkId: String
+    bulkName: String
   }
 
   input UpdateDeploymentInput {
@@ -1270,11 +1338,17 @@ const typeDefs = gql`
   enum AdvancedTaskDefinitionArgumentTypes {
     NUMERIC
     STRING
+    ENVIRONMENT_SOURCE_NAME
   }
 
   input AdvancedTaskDefinitionArgumentInput {
     name: String
     type: AdvancedTaskDefinitionArgumentTypes
+  }
+
+  input AdvancedTaskDefinitionArgumentValueInput {
+    advancedTaskDefinitionArgumentName: String
+    value: String
   }
 
   enum AdvancedTaskDefinitionTypes {
@@ -1283,6 +1357,25 @@ const typeDefs = gql`
   }
 
   input AdvancedTaskDefinitionInput {
+    name: String
+    description: String
+    image: String
+    type: AdvancedTaskDefinitionTypes
+    service: String
+    command: String
+    environment: Int
+    project: Int
+    groupName: String
+    permission: TaskPermission
+    advancedTaskDefinitionArguments: [AdvancedTaskDefinitionArgumentInput]
+  }
+
+  input UpdateAdvancedTaskDefinitionInput {
+    id: Int!
+    patch: UpdateAdvancedTaskDefinitionPatchInput!
+  }
+
+  input UpdateAdvancedTaskDefinitionPatchInput {
     name: String
     description: String
     image: String
@@ -1323,6 +1416,9 @@ const typeDefs = gql`
     consoleUrl: String!
     token: String
     routerPattern: String
+    """
+    @deprecated(reason: "Not used with RBAC permissions")
+    """
     projectUser: String
     sshHost: String
     sshPort: String
@@ -1338,6 +1434,9 @@ const typeDefs = gql`
     consoleUrl: String!
     token: String
     routerPattern: String
+    """
+    @deprecated(reason: "Not used with RBAC permissions")
+    """
     projectUser: String
     sshHost: String
     sshPort: String
@@ -1472,6 +1571,8 @@ const typeDefs = gql`
     developmentEnvironmentsLimit: Int
     problemsUi: Int
     factsUi: Int
+    productionBuildPriority: Int
+    developmentBuildPriority: Int
     deploymentsDisabled: Int
   }
 
@@ -1485,6 +1586,9 @@ const typeDefs = gql`
     consoleUrl: String
     token: String
     routerPattern: String
+    """
+    @deprecated(reason: "Not used with RBAC permissions")
+    """
     projectUser: String
     sshHost: String
     sshPort: String
@@ -1504,6 +1608,9 @@ const typeDefs = gql`
     consoleUrl: String
     token: String
     routerPattern: String
+    """
+    @deprecated(reason: "Not used with RBAC permissions")
+    """
     projectUser: String
     sshHost: String
     sshPort: String
@@ -1635,14 +1742,29 @@ const typeDefs = gql`
     id: Int!
   }
 
+  input EnvKeyValueInput {
+    name: String
+    value: String
+  }
+
   input DeployEnvironmentLatestInput {
     environment: EnvironmentInput!
+    priority: Int
+    bulkId: String
+    bulkName: String
+    buildVariables: [EnvKeyValueInput]
+    returnData: Boolean
   }
 
   input DeployEnvironmentBranchInput {
     project: ProjectInput!
     branchName: String!
     branchRef: String
+    priority: Int
+    bulkId: String
+    bulkName: String
+    buildVariables: [EnvKeyValueInput]
+    returnData: Boolean
   }
 
   input DeployEnvironmentPullrequestInput {
@@ -1653,12 +1775,22 @@ const typeDefs = gql`
     baseBranchRef: String!
     headBranchName: String!
     headBranchRef: String!
+    priority: Int
+    bulkId: String
+    bulkName: String
+    buildVariables: [EnvKeyValueInput]
+    returnData: Boolean
   }
 
   input DeployEnvironmentPromoteInput {
     sourceEnvironment: EnvironmentInput!
     project: ProjectInput!
     destinationEnvironment: String!
+    priority: Int
+    bulkId: String
+    bulkName: String
+    buildVariables: [EnvKeyValueInput]
+    returnData: Boolean
   }
 
   input switchActiveStandbyInput {
@@ -1707,6 +1839,12 @@ const typeDefs = gql`
   input ProjectGroupsInput {
     project: ProjectInput!
     groups: [GroupInput!]!
+  }
+
+  input BulkDeploymentLatestInput {
+    buildVariables: [EnvKeyValueInput]
+    environments: [DeployEnvironmentLatestInput!]!
+    name: String
   }
 
   type Mutation {
@@ -1800,6 +1938,7 @@ const typeDefs = gql`
     deleteUser(input: DeleteUserInput!): String
     deleteAllUsers: String
     addDeployment(input: AddDeploymentInput!): Deployment
+    bulkDeployEnvironmentLatest(input: BulkDeploymentLatestInput!): String
     deleteDeployment(input: DeleteDeploymentInput!): String
     updateDeployment(input: UpdateDeploymentInput): Deployment
     cancelDeployment(input: CancelDeploymentInput!): String
@@ -1824,8 +1963,12 @@ const typeDefs = gql`
     deleteEnvVariable(input: DeleteEnvVariableInput!): String
     addTask(input: TaskInput!): Task
     addAdvancedTaskDefinition(input: AdvancedTaskDefinitionInput!): AdvancedTaskDefinition
-    invokeRegisteredTask(advancedTaskDefinition: Int!, environment: Int!): Task
+    updateAdvancedTaskDefinition(input: UpdateAdvancedTaskDefinitionInput!): AdvancedTaskDefinition
+    invokeRegisteredTask(advancedTaskDefinition: Int!, environment: Int!, argumentValues: [AdvancedTaskDefinitionArgumentValueInput]): Task
     deleteAdvancedTaskDefinition(advancedTaskDefinition: Int!): String
+    addWorkflow(input: AddWorkflowInput!): Workflow
+    updateWorkflow(input: UpdateWorkflowInput): Workflow
+    deleteWorkflow(input: DeleteWorkflowInput!): String
     taskDrushArchiveDump(environment: Int!): Task
     taskDrushSqlDump(environment: Int!): Task
     taskDrushCacheClear(environment: Int!): Task
