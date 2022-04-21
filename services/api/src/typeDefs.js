@@ -14,6 +14,9 @@ const typeDefs = gql`
   enum SshKeyType {
     SSH_RSA
     SSH_ED25519
+    ECDSA_SHA2_NISTP256
+    ECDSA_SHA2_NISTP384
+    ECDSA_SHA2_NISTP521
   }
 
   enum DeployType {
@@ -126,6 +129,7 @@ const typeDefs = gql`
   type AdvancedTaskDefinitionArgument {
     id: Int
     name: String
+    displayName: String
     type: String
     range: [String]
     advancedTaskDefinition: AdvancedTaskDefinition
@@ -135,6 +139,7 @@ const typeDefs = gql`
     id: Int
     name: String
     description: String
+    confirmationText: String
     type: AdvancedTaskDefinitionTypes
     image: String
     service: String
@@ -151,6 +156,7 @@ const typeDefs = gql`
     id: Int
     name: String
     description: String
+    confirmationText: String
     type: AdvancedTaskDefinitionTypes
     service: String
     command: String
@@ -1341,6 +1347,7 @@ const typeDefs = gql`
   input AdvancedTaskDefinitionArgumentInput {
     name: String
     type: AdvancedTaskDefinitionArgumentTypes
+    displayName: String
   }
 
   input AdvancedTaskDefinitionArgumentValueInput {
@@ -1365,6 +1372,7 @@ const typeDefs = gql`
     groupName: String
     permission: TaskPermission
     advancedTaskDefinitionArguments: [AdvancedTaskDefinitionArgumentInput]
+    confirmationText: String
   }
 
   input UpdateAdvancedTaskDefinitionInput {
@@ -1384,6 +1392,7 @@ const typeDefs = gql`
     groupName: String
     permission: TaskPermission
     advancedTaskDefinitionArguments: [AdvancedTaskDefinitionArgumentInput]
+    confirmationText: String
   }
 
   input DeleteTaskInput {
