@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: opendistro
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opendistro
+  namespace: opendistro
+spec:
+  type: ExternalName
+  externalName: 172.17.0.2.nip.io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opendistro-kibana
+  namespace: opendistro
+spec:
+  type: ExternalName
+  externalName: 172.17.0.2.nip.io
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: opendistro
+  namespace: opendistro
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: opendistro.172.17.0.2.nip.io
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: opendistro
+              port:
+                number: 9200
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: opendistro-kibana
+  namespace: opendistro
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: opendistro-kibana.172.17.0.2.nip.io
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: opendistro-kibana
+              port:
+                number: 5601

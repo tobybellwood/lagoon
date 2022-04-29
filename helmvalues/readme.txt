@@ -1,7 +1,7 @@
 
 # These steps assume you have tools like helm, kubectl etc all installed.
 
-# Find the IP address for the network - replace this in all the helmvalues files (may be 192.168.1.51 or similar)
+# Find the IP address for the network - replace this in all the helmvalues files (may be 172.17.0.2 or similar)
 
     If it's KinD:
     docker network create kind || true && docker run --rm --network kind alpine ip -o addr show eth0 | sed -nE 's/.* ([0-9.]{7,})\/.*/\1/p'
@@ -10,7 +10,7 @@
     (see section at bottom)
 
 # e.g. sample replace command - use the output from above in the second half of the sed command below
-find ./helmvalues -type f | xargs sed -i "s/172.17.0.2/192.168.1.51/g"
+find ./helmvalues -type f | xargs sed -i "s/172.17.0.2/{your_ip}}/g"
 
     # Create the cluster - KinD
     kind create cluster --wait=120s --config=helmvalues/kind-config.yaml
@@ -58,8 +58,8 @@ helm upgrade --install --create-namespace --namespace lagoon --wait --timeout 30
 kubectl -n lagoon get secret -o json | jq -r '.items[] | select(.metadata.name | match("lagoon-build-deploy-token")) | .data.token | @base64d' | xargs -I ARGS yq -i eval '.token = "ARGS"' helmvalues/local.yaml
 
 # Install the testing components and run the tests (default is nginx tests) - if you change the tests, you need to run both helm commands
-helm upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-test lagoon/lagoon-test -f helmvalues/lagoon-test.yaml -f helmvalues/local.yaml
-helm test lagoon-test --namespace lagoon
+# Install the ExternalName services to access the odfe docker-compose cluster
+kubectl apply -f ./helmvalues/opensearch-externalname.yaml
 
 # Use these to get the admin passwords
 docker run \
@@ -94,7 +94,7 @@ helm upgrade --install --create-namespace --namespace lagoon-logging --wait --ti
 
 # Install microk8s and enable addons
 sudo snap install microk8s --classic --channel=1.20/stable
-microk8s enable dns helm3 storage
+microk8s enable dns helm3 metrics-server storage
 
 # get the IP for the microk8s node
 microk8s kubectl get nodes -o custom-columns=IP:.status.addresses

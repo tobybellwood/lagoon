@@ -46,6 +46,8 @@ apiDB:
   image:
     repository: testlagoon/api-db
   storageSize: 16Gi
+  additionalEnvs:
+    MARIADB_WAIT_TIMEOUT: 300
 
 apiRedis:
   replicaCount: 1
