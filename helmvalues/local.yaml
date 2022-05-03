@@ -38,6 +38,7 @@ insightsHandler:
 
 # lagoon-build-deploy
 overrideBuildDeployImage: testlagoon/kubectl-build-deploy-dind:main
+rootlessBuildPods: false
 lagoonFeatureFlagForceInsights: enabled
 # overrideBuildDeployImage: registry.172.17.0.2.nip.io:32080/library/lagoon/kubectl-build-deploy-dind:latest
 
@@ -45,8 +46,8 @@ lagoonFeatureFlagForceInsights: enabled
 rabbitMQPassword: xogie5lae8IoshugahcoeThakiequo3I
 # This sets the same authserver client secret in lagoon-core and lagoon-test
 keycloakAuthServerClientSecret: 2da72b5c-f97f-4d6a-93cf-2a8996ee50d4
-elasticsearchURL: https://opendistro.opendistro-es.svc.cluster.local:9200
-kibanaURL: http://opendistro-kibana.opendistro-es.svc.cluster.local:5601
+elasticsearchURL: https://opendistro.opendistro.svc.cluster.local:9200
+kibanaURL: http://opendistro-kibana.opendistro.svc.cluster.local:5601
 
 # DBaaS Passwords
 auth:
@@ -54,7 +55,10 @@ auth:
 postgresqlPassword: ba7ees3aiy0eiNai
 #lagoon-remote
 lagoon-build-deploy:
-  enabled: false
+  enabled: true
+  rabbitMQPassword: xogie5lae8IoshugahcoeThakiequo3I
+  overrideBuildDeployImage: testlagoon/kubectl-build-deploy-dind:main
+  # overrideBuildDeployImage: registry.172.17.0.2.nip.io:32080/library/lagoon/kubectl-build-deploy-dind:latest
 dbaas-operator:
   mariadbProviders:
     development:

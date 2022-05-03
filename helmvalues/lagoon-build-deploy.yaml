@@ -5,6 +5,15 @@ lagoonTargetName: ci-local-control-k8s
 taskSSHHost: lagoon-core-ssh.lagoon.svc
 taskSSHPort: 2020
 taskAPIHost: http://lagoon-core-api.lagoon.svc:80
+extraArgs:
+  - "--enable-harbor=true"
+  - "--harbor-rotate-interval=1h"
+  - "--harbor-url=http://registry.172.17.0.2.nip.io:32080"
+  - "--harbor-api=http://registry.172.17.0.2.nip.io:32080/api/"
+  - "--harbor-username=admin"
+  - "--harbor-password=Harbor12345"
+  - "--enable-qos"
+  - "--qos-max-builds=15"
 
 # image:
 #   repository: uselagoon/remote-controller
