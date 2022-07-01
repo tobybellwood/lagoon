@@ -1,8 +1,8 @@
 gitea:
   admin:
-    username: "admin"
-    password: "Gitea12345"
-    email: "gitea@example.com"
+    username: "gitea_admin"
+    password: "r8sA8CPHD9!bt6d"
+    email: "gitea@local.domain"
   config:
     server:
       SSH_DOMAIN: gitea-ssh.gitea.svc.cluster.local

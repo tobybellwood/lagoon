@@ -1,0 +1,30 @@
+
+k8up:
+  envVars:
+   - name: BACKUP_GLOBALS3ENDPOINT
+     value: "http://minio-api.172.17.0.2.nip.io:32080"
+   - name: BACKUP_GLOBALS3BUCKET
+     value: ""
+   - name: BACKUP_GLOBALKEEPJOBS
+     value: "1"
+   - name: BACKUP_GLOBALSTATSURL
+     value: "http://lagoon-core-backup-handler.lagoon.svc:3000" # URL of Backup Handler Ingress
+   - name: BACKUP_GLOBALACCESSKEYID
+     value: "lagoonFilesAccessKey" # AWS AccessKey which has S3 read/write access to all `baas-*` buckets
+   - name: BACKUP_GLOBALSECRETACCESSKEY
+     value: "lagoonFilesSecretKey" # AWS AccessKey Secret which has S3 read/write access to all `baas-*` buckets
+   - name: BACKUP_BACKOFFLIMIT
+     value: "2"
+   - name: BACKUP_GLOBALRESTORES3BUCKET
+     value: "baas-restores" # should start with `baas-*` for simpler permissions
+   - name: BACKUP_GLOBALRESTORES3ENDPOINT
+     value: "http://minio-api.172.17.0.2.nip.io:32080"
+   - name: BACKUP_GLOBALRESTORES3ACCESSKEYID
+     value: "lagoonFilesAccessKey" # AWS AccessKey which has S3 read/write access to the bucket defined in BACKUP_GLOBALRESTORES3BUCKET
+   - name: BACKUP_GLOBALRESTORES3SECRETACCESSKEY
+     value: "lagoonFilesSecretKey" # AWS AccessKey which has S3 read/write access to the bucket defined in BACKUP_GLOBALRESTORES3BUCKET
+
+  # -- Specifies the timezone K8up is using for scheduling.
+  # Empty value defaults to the timezone in which Kubernetes is deployed.
+  # Accepts `tz database` compatible entries, e.g. `Europe/Zurich`
+  timezone: "Australia/Sydney"

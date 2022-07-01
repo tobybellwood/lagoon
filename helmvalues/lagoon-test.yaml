@@ -1,22 +1,49 @@
+imageTag: main
 ingressIP: 172.17.0.2
 keycloakAuthServerClientSecret: 64ad81b4-e5d9-4940-9f84-27f8743919fa
 routeSuffixHTTP: 172.17.0.2.nip.io
 routeSuffixHTTPS: 172.17.0.2.nip.io
-token: set-in-localyaml
+# sshPortalHost: lagoon-remote-ssh-portal
+# sshPortalPort: 2222
+token: eyJhbGciOiJSUzI1NiIsImtpZCI6Ii10UGdhME9kVk5JYkN3c0U3Nlp2RkkxWFdxdDBjODN5RmcyUEVLS0RZbmcifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJsYWdvb24iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoibGFnb29uLWJ1aWxkLWRlcGxveS10b2tlbi1zZHRyaCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJsYWdvb24tYnVpbGQtZGVwbG95Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiYjU1N2Q4YzItODkzNC00ZDhkLThlZDItOWY1OWY5YWRhMzNiIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmxhZ29vbjpsYWdvb24tYnVpbGQtZGVwbG95In0.LL-3_shk23SaOPX6wuhheLB47pKaWJX4W77RYlcIzPMHJC1R-SqrGLw-vThinmKqNDcsVvonIB5X6lCbZnOMrLtMUnhjmviWAC2WeYHbuyjRUdisgOUXO4tU9DaHxcj2D52geD3kX24k1M6ywVhTdpG71ApvZ0LoucYlCU363TotubOyKpEe_DZf9nx9JLGpFGh6ozCZT9SFcRJMEno3LPD7CPPX4SZjTBRV7VAplXK-z9iSt_eTBeCmb-u--oc2rhC07ciy-dVxs2Pi77KqxoSwfk_jlf49EOLoHZpdD8S3tr-uWS9yfe_vva4pqkQLJUhGrCgdaL9TivH9Koa6eA
 webhookHost: lagoon-core-webhook-handler
-
-localGit:
-  image:
-    repository: testlagoon/local-git
-
 localAPIDataWatcherPusher:
   image:
     repository: testlagoon/local-api-data-watcher-pusher
-
+    # repository: registry.172.17.0.2.nip.io:32080/library/lagoon/local-api-data-watcher-pusher
+    # tag: latest
+localGit:
+  image:
+    repository: testlagoon/local-git
 tests:
   image:
     repository: testlagoon/tests
+    # repository: registry.172.17.0.2.nip.io:32080/library/lagoon/tests
+    # tag: latest
   tests:
-    - nginx
-
-imageTag: ""
+    # - active-standby-kubernetes
+    # - api
+    # - bitbucket
+    # - bulkdeployment
+    # - dbaas
+    # - deploytarget
+    # - drupal-php74
+    # - drupal-php80
+    # - drupal-postgres
+    # - drush
+    - elasticsearch
+    # - features-api-variables
+    # - features-kubernetes-2
+    # - features-kubernetes
+    # - generic
+    # - github
+    # - gitlab
+    # - image-cache
+    # - nginx
+    # - node-mongodb
+    # - node-various
+    - node
+    - python
+    # - ssh-portal
+    # - tasks
+    # - workflows

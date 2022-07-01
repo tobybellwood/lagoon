@@ -1,0 +1,7 @@
+
+# Set a root password for the MariaDB and MongoDB services
+auth:
+  rootPassword: ba7ees3aiy0eiNai
+
+# Set a root password for the PostgreSQL service
+postgresqlPassword: ba7ees3aiy0eiNai

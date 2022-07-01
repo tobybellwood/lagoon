@@ -1,28 +1,34 @@
 # Any values defined here are not used anywhere other than lint/CI.
-
 # used in api
+
+imageTag: main
 
 harborURL: https://disabled-only-uses-harbors-via-deploy-controller.com
 harborAdminPassword: not-needed
 registry: none.com
 
-elasticsearchURL: http://opendistro-es-client-service.opendistro-es.svc.cluster.local:9200
-kibanaURL: http://opendistro-es-kibana-svc.opendistro-es.svc.cluster.local:443
+
+elasticsearchURL: https://opendistro.opendistro.svc.cluster.local:9200
+kibanaURL: http://opendistro-kibana.opendistro.svc.cluster.local:5601
+
 logsDBAdminPassword: admin
 
+# Settings to communicate with minio
 s3FilesAccessKeyID: lagoonFilesAccessKey
 s3FilesSecretAccessKey: lagoonFilesSecretKey
 s3FilesBucket: lagoon-files
 s3FilesHost: http://minio-api.172.17.0.2.nip.io:32080
 
-s3BAASAccessKeyID: baas #sets S3_BAAS_ACCESS_KEY_ID in api.secret for custom restores
-s3BAASSecretAccessKey: baas123 #sets s3BAASSecretAccessKey in api.secret for custom restores
+s3BAASAccessKeyID: lagoonFilesAccessKey #sets S3_BAAS_ACCESS_KEY_ID in api.secret for custom restores
+s3BAASSecretAccessKey: lagoonFilesSecretKey #sets s3BAASSecretAccessKey in api.secret for custom restores
 
 lagoonUIURL: http://lagoon-ui.172.17.0.2.nip.io:32080 #sets UI_URL in api.deployment
 lagoonWebhookURL: http://lagoon-webhook.172.17.0.2.nip.io:32080 #sets WEBHOOK_URL in api.deployment
 
-rabbitMQPassword: set-in-localyaml
-keycloakAuthServerClientSecret: set-in-localyaml
+# This sets the same password in the lagoon-core-broker and lagoon-build-deploy to allow them to communicate
+rabbitMQPassword: xogie5lae8IoshugahcoeThakiequo3I
+# This sets the same authserver client secret in lagoon-core and lagoon-test
+keycloakAuthServerClientSecret: 2da72b5c-f97f-4d6a-93cf-2a8996ee50d4
 
 overwriteKubectlBuildDeployDindImage:
 
@@ -34,6 +40,8 @@ api:
   replicaCount: 1
   image:
     repository: testlagoon/api
+#     repository: registry.172.17.0.2.nip.io:32080/library/lagoon/api
+#     tag: latest
   ingress:
     enabled: true
     hosts:
@@ -64,17 +72,11 @@ authServer:
   image:
     repository: testlagoon/auth-server
 
-autoIdler:
-  replicaCount: 1
-  image:
-    repository: testlagoon/auto-idler
-  enabled: false
-
 backupHandler:
   replicaCount: 1
   image:
     repository: testlagoon/backup-handler
-  enabled: false
+  enabled: true
 
 broker:
   replicaCount: 1
@@ -111,9 +113,13 @@ keycloak:
       - /
 
 insightsHandler:
+  enabled: true
   image:
     repository: uselagoon/insights-handler
     tag: main
+  additionalEnvs:
+    S3_USESSL: 'false'
+
 
 keycloakDB:
   replicaCount: 1
@@ -166,11 +172,22 @@ ssh:
       paths:
       - /
 
+sshPortalAPI:
+  replicaCount: 1
+  enabled: true
+  image:
+    repository: ghcr.io/uselagoon/lagoon-ssh-portal/ssh-portal-api
+    pullPolicy: Always
+    tag: "v0.15.0"
+  debug: true
+  serviceMonitor:
+    enabled: false
+
 storageCalculator:
   replicaCount: 1
   image:
     repository: testlagoon/storage-calculator
-  enabled: false
+  enabled: true
 
 ui:
   replicaCount: 1
@@ -203,3 +220,55 @@ workflows:
   replicaCount: 1
   image:
     repository: testlagoon/workflows
+
+# enable nats cluster (and optionally natsbox debugger)
+nats:
+  enabled: true
+  # natsbox:
+  #   enabled: true
+  #   # additional labels are required due to the network policy
+  #   additionalLabels:
+  #     lagoon-core-nats-client: "true"
+
+natsService:
+  type: ClusterIP
+
+natsConfig:
+  users:
+    lagoonRemote:
+    - user: ci-ssh-portal
+      password: ci-password
+  tls:
+    secretData:
+      ca.crt: |
+        -----BEGIN CERTIFICATE-----
+        MIIBgDCCASagAwIBAgIUe/jnFQ0sqoJKQP9CmguStIhyCNcwCgYIKoZIzj0EAwIw
+        HjEcMBoGA1UEAxMTbmF0cy1jYS5leGFtcGxlLmNvbTAeFw0yMjAzMDMxNDU2MDBa
+        Fw0zMjAyMjkxNDU2MDBaMB4xHDAaBgNVBAMTE25hdHMtY2EuZXhhbXBsZS5jb20w
+        WTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAT6ZjUtTIpBJSgGRyQIPdcFKBkt3h76
+        eyIdFVkR4L5NxVLwxyrj3ejbkA/KtbHfT+5+i1lpFyneUnCv8uJMGXXDo0IwQDAO
+        BgNVHQ8BAf8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUJnGYc+vw
+        zYXQvaFUImSZnEytUkkwCgYIKoZIzj0EAwIDSAAwRQIgET+GwxQ2TokxnPkNhgjb
+        zJ6PDtVHMNclAWSDebP9nnwCIQDrblreePb+pUBHvxFZNVFYBV4wF2gEkJC51tjw
+        a8aklQ==
+        -----END CERTIFICATE-----
+      server.crt: |
+        -----BEGIN CERTIFICATE-----
+        MIIB6TCCAY+gAwIBAgIUU0rJ7NyqtVt26P4ymCHc2wI1xTgwCgYIKoZIzj0EAwIw
+        HjEcMBoGA1UEAxMTbmF0cy1jYS5leGFtcGxlLmNvbTAeFw0yMjAzMDMxNDU2MDBa
+        Fw0zMjAyMjkxNDU2MDBaMCgxJjAkBgNVBAMTHWxhZ29vbi1jb3JlLW5hdHMtY29u
+        Y2VudHJhdG9yMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEzOKHU61tPi3IS4Tb
+        TekSPQ5j0eS3ALLR8AhHY+lV6K3FNHnrCeCkBP12Kg3c29fjk3OnvdOixqgjXTO9
+        1GvhgqOBoDCBnTAOBgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAwwCgYIKwYBBQUHAwEw
+        DAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQUs3UCwAl/W6+UyUMhlyL/P2igQCQwHwYD
+        VR0jBBgwFoAUJnGYc+vwzYXQvaFUImSZnEytUkkwKAYDVR0RBCEwH4IdbGFnb29u
+        LWNvcmUtbmF0cy1jb25jZW50cmF0b3IwCgYIKoZIzj0EAwIDSAAwRQIhAOEZUQfm
+        tuziNxJqFdnsQqzEHHDcFBJsMqzC2T4AChinAiBr/BMy3ZFUE57629+mvnevQKF2
+        Xj0jfUL6vS82EAusNQ==
+        -----END CERTIFICATE-----
+      server.key: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIEEOrqm8DWTCnc6rq2OHmWcfSu/ewpv009gD9ekvWKMDoAoGCCqGSM49
+        AwEHoUQDQgAEzOKHU61tPi3IS4TbTekSPQ5j0eS3ALLR8AhHY+lV6K3FNHnrCeCk
+        BP12Kg3c29fjk3OnvdOixqgjXTO91Gvhgg==
+        -----END EC PRIVATE KEY-----

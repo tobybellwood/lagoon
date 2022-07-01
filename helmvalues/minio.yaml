@@ -1,7 +1,6 @@
-accessKey:
-  password: lagoonFilesAccessKey
-secretKey:
-  password: lagoonFilesSecretKey
+auth:
+  rootUser: lagoonFilesAccessKey
+  rootPassword: lagoonFilesSecretKey
 defaultBuckets: lagoon-files
 ingress:
   enabled: true

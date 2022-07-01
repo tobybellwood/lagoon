@@ -10,7 +10,9 @@
     (see section at bottom)
 
 # e.g. sample replace command - use the output from above in the second half of the sed command below
-find ./helmvalues -type f | xargs sed -i "s/172.17.0.2/{your_ip}}/g"
+(Linux) find ./helmvalues -type f | xargs sed -i "s/172.17.0.2/{your_ip}/g"
+(Mac) find ./helmvalues -type f -exec sed -i '' s/172.17.0.2/{your_ip}/g {} +
+
 
     # Create the cluster - KinD
     kind create cluster --wait=120s --config=helmvalues/kind-config.yaml
@@ -22,47 +24,41 @@ find ./helmvalues -type f | xargs sed -i "s/172.17.0.2/{your_ip}}/g"
 kubectx kind-lagoon-local && kubens default
 
 # Install/Update all necessary Helm repositories
-helm plugin install https://github.com/aslafy-z/helm-git
-helm repo add harbor https://helm.goharbor.io
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-helm repo add stable https://charts.helm.sh/stable
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add minio https://helm.min.io/
-helm repo add amazeeio https://amazeeio.github.io/charts/
-helm repo add lagoon https://uselagoon.github.io/lagoon-charts/
-helm repo update
+microk8s helm3 plugin install https://github.com/aslafy-z/helm-git
+microk8s helm3 repo add harbor https://helm.goharbor.io
+microk8s helm3 repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+microk8s helm3 repo add stable https://charts.helm.sh/stable
+microk8s helm3 repo add bitnami https://charts.bitnami.com/bitnami
+microk8s helm3 repo add minio https://helm.min.io/
+microk8s helm3 repo add amazeeio https://amazeeio.github.io/charts/
+microk8s helm3 repo add lagoon https://uselagoon.github.io/lagoon-charts/
+microk8s helm3 repo update
 
 # Install the cluster prerequisites (currently version pinned)
-microk8s helm3 upgrade --install --create-namespace --namespace ingress-nginx --wait --timeout 30m --version 3.40.0 ingress-nginx ingress-nginx/ingress-nginx -f helmvalues/ingress-nginx.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace registry --wait --timeout 30m --version 1.5.6 registry harbor/harbor -f helmvalues/registry.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace nfs-server-provisioner --wait --timeout 30m --version 1.1.3 nfs-server-provisioner stable/nfs-server-provisioner -f helmvalues/nfs-server-provisioner.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace minio --wait --timeout 30m --version 8.1.11 minio bitnami/minio -f helmvalues/minio.yaml
+microk8s helm3 upgrade --install --create-namespace --namespace ingress-nginx --wait --timeout 30m --version 4.1.3 ingress-nginx ingress-nginx/ingress-nginx -f ${PWD}/helmvalues/ingress-nginx.yaml
+microk8s helm3 upgrade --install --create-namespace --namespace registry --wait --timeout 30m --version 1.9.1 registry harbor/harbor -f ${PWD}/helmvalues/registry.yaml
+microk8s helm3 upgrade --install --create-namespace --namespace nfs-server-provisioner --wait --timeout 30m --version 1.1.3 nfs-server-provisioner stable/nfs-server-provisioner -f ${PWD}/helmvalues/nfs-server-provisioner.yaml
+microk8s helm3 upgrade --install --create-namespace --namespace minio --wait --timeout 30m --version 11.6.3 minio bitnami/minio -f ${PWD}/helmvalues/minio.yaml
 
 # Install the DBaaS databases as required
-microk8s helm3 upgrade --install --create-namespace --namespace mariadb --wait --timeout 30m --version=10.1.1 mariadb bitnami/mariadb -f helmvalues/local.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace postgresql --wait --timeout 30m --version=10.13.14 postgresql bitnami/postgresql -f helmvalues/local.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace mongodb --wait --timeout 30m --version=10.30.6 mongodb bitnami/mongodb -f helmvalues/local.yaml
+microk8s helm3 upgrade --install --create-namespace --namespace mariadb --wait --timeout 30m --version=10.5.1 mariadb bitnami/mariadb -f ${PWD}/helmvalues/dbaas.yaml
+microk8s helm3 upgrade --install --create-namespace --namespace postgresql --wait --timeout 30m --version=10.16.2 postgresql bitnami/postgresql -f ${PWD}/helmvalues/dbaas.yaml
+microk8s helm3 upgrade --install --create-namespace --namespace mongodb --wait --timeout 30m --version=11.2.0 mongodb bitnami/mongodb -f ${PWD}/helmvalues/dbaas.yaml
 
 # Install the Lagoon components
-microk8s helm3 upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-core lagoon/lagoon-core -f helmvalues/lagoon-core.yaml -f helmvalues/local.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-build-deploy lagoon/lagoon-build-deploy -f helmvalues/lagoon-build-deploy.yaml -f helmvalues/local.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-remote lagoon/lagoon-remote -f helmvalues/lagoon-remote.yaml -f helmvalues/local.yaml
+microk8s helm3 upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-core lagoon/lagoon-core -f ${PWD}/helmvalues/lagoon-core.yaml
+microk8s helm3 upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-build-deploy lagoon/lagoon-build-deploy -f ${PWD}/helmvalues/lagoon-build-deploy.yaml
+microk8s helm3 upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-remote lagoon/lagoon-remote -f ${PWD}/helmvalues/lagoon-remote.yaml
 
-# Install any additional tooling
-microk8s helm3 upgrade --install --create-namespace --namespace gitea --wait --timeout 30m gitea gitea-charts/gitea -f helmvalues/gitea.yaml
-
-# To install a component from the local lagoon-charts (e.g lagoon-core)
-microk8s helm3 upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-core ../lagoon-charts/charts/lagoon-core -f helmvalues/lagoon-core.yaml -f helmvalues/local.yaml
-
-# Need a token installed into the tests charts to allow it to talk to core
-microk8s kubectl -n lagoon get secret -o json | jq -r '.items[] | select(.metadata.name | match("lagoon-build-deploy-token")) | .data.token | @base64d' | xargs -I ARGS yq -i eval '.token = "ARGS"' helmvalues/local.yaml
+# Need the correct token installed into the tests charts to allow it to talk to core
+microk8s kubectl -n lagoon get secret -o json | jq -r '.items[] | select(.metadata.name | match("lagoon-build-deploy-token")) | .data.token | @base64d' | xargs -I ARGS yq -i eval '.token = "ARGS"' helmvalues/lagoon-test.yaml
 
 # Install the testing components and run the tests (default is nginx tests) - if you change the tests, you need to run both helm commands
-microk8s helm3 upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-test lagoon/lagoon-test -f helmvalues/lagoon-test.yaml -f helmvalues/local.yaml
+microk8s helm3 upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-test lagoon/lagoon-test -f ${PWD}/helmvalues/lagoon-test.yaml
 microk8s helm3 test lagoon-test --namespace lagoon
 
-# Install the ExternalName services to access the odfe docker-compose cluster
-microk8s kubectl apply -f ./helmvalues/opensearch-externalname.yaml
+# Use build-and-push from the root dir to wrap around make build and push the resulting image up to the harbor
+./helmvalues/build-and-push.sh kubectl-build-deploy-dind
 
 # Use these to get the admin passwords
 docker run \
@@ -85,13 +81,20 @@ kubectl get MongoDBProvider -A | awk '{printf "kubectl -n %s patch MongoDBProvid
 kubectl get PostgreSQLConsumer -A | awk '{printf "kubectl -n %s patch PostgreSQLConsumer %s -p \047{\"metadata\":{\"finalizers\":null}}\047 --type=merge\n", $1, $2}' | bash
 kubectl get PostgreSQLProvider -A | awk '{printf "kubectl -n %s patch PostgreSQLProvider %s -p \047{\"metadata\":{\"finalizers\":null}}\047 --type=merge\n", $1, $2}' | bash
 
-# Use build-and-push from the root dir to wrap around make build and push the resulting image up to the harbor
-./helmvalues/build-and-push.sh kubectl-build-deploy-dind
+
+# Install any additional tooling
+microk8s helm3 upgrade --install --create-namespace --namespace gitea --wait --timeout 30m gitea gitea-charts/gitea -f ${PWD}/helmvalues/gitea.yaml
+
+# To install a component from the local lagoon-charts (e.g lagoon-core)
+microk8s helm3 upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-core ../lagoon-charts/charts/lagoon-core -f ${PWD}/helmvalues/lagoon-core.yaml
 
 # Lagoon Logging
+
 docker-compose -f local-dev/odfe-docker-compose.yml -p odfe up -d
+microk8s kubectl apply -f ${PWD}/helmvalues/opensearch-externalname.yaml
 microk8s helm3 upgrade --install --create-namespace --namespace lagoon-logs-concentrator --wait --timeout 15m lagoon-logs-concentrator lagoon/lagoon-logs-concentrator --values ./local-dev/lagoon-logs-concentrator.values.yaml
 microk8s helm3 upgrade --install --create-namespace --namespace lagoon-logging --wait --timeout 15m lagoon-logging lagoon/lagoon-logging --values ./local-dev/lagoon-logging.values.yaml
+
 
 # microk8s
 
@@ -109,6 +112,9 @@ microk8s kubectl get nodes -o custom-columns=IP:.status.addresses
 sudo microk8s stop && sudo microk8s start
 
 # Replace storageclass with bulk and standard storageclasses - you don't need the nfs-server-provisioner helm chart on microk8s
-microk8s kubectl apply -f helmvalues/microk8s-storageclass.yaml
+microk8s kubectl apply -f ${PWD}/helmvalues/microk8s-storageclass.yaml
+
+multipass mount ./helmvalues microk8s-vm:/home/ubuntu/helmvalues
+
 
 Rest of it should be pretty straightforward.

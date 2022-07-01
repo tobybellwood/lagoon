@@ -1,5 +1,5 @@
 rabbitMQUsername: lagoon
-rabbitMQPassword: set-in-localyaml
+rabbitMQPassword: xogie5lae8IoshugahcoeThakiequo3I
 rabbitMQHostname: lagoon-core-broker
 lagoonTargetName: ci-local-control-k8s
 taskSSHHost: lagoon-core-ssh.lagoon.svc
@@ -19,8 +19,10 @@ extraArgs:
 #   repository: uselagoon/remote-controller
 #   tag: v0.2.2
 
-overrideBuildDeployImage: uselagoon/kubectl-build-deploy-dind:latest
+# overrideBuildDeployImage: registry.172.17.0.2.nip.io:32080/library/lagoon/kubectl-build-deploy-dind:latest
+overrideBuildDeployImage: testlagoon/kubectl-build-deploy-dind:main
 
-# rootlessBuildPods: true
+rootlessBuildPods: false
+lagoonFeatureFlagForceInsights: enabled
 # lagoonFeatureFlagDefaultRootlessWorkload: $(LAGOON_FEATURE_FLAG_DEFAULT_ROOTLESS_WORKLOAD)
 # lagoonFeatureFlagDefaultIsolationNetworkPolicy: $(LAGOON_FEATURE_FLAG_DEFAULT_ISOLATION_NETWORK_POLICY)

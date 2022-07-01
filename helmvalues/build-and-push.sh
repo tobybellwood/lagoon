@@ -1,7 +1,7 @@
 #!/bin/bash
 
+# comment out these two lines to push only (i.e. the image is built in another lagoon folder)
 rm build/$1 || true
-
 make build/$1
 
 docker tag lagoon/$1 registry.172.17.0.2.nip.io:32080/library/lagoon/$1:latest
