@@ -143,6 +143,10 @@ set -x
 ##############################################
 
 set +x
+
+# Load path of docker-compose that should be used
+DOCKER_COMPOSE_YAML=($(cat .lagoon.yml | shyaml get-value docker-compose-yaml))
+
 echo "Updating lagoon-yaml configmap with a pre-deploy version of the .lagoon.yml file"
 if kubectl -n ${NAMESPACE} get configmap lagoon-yaml &> /dev/null; then
   # replace it
@@ -160,6 +164,23 @@ if kubectl -n ${NAMESPACE} get configmap lagoon-yaml &> /dev/null; then
   # create it
   kubectl -n ${NAMESPACE} create configmap lagoon-yaml --from-file=pre-deploy=.lagoon.yml
 fi
+echo "Updating docker-compose-yaml configmap with a pre-deploy version of the docker-compose.yml file"
+if kubectl -n ${NAMESPACE} get configmap docker-compose-yaml &> /dev/null; then
+  # replace it
+  # if the environment has already been deployed with an existing configmap that had the file in the key `docker-compose.yml`
+  # just nuke the entire configmap and replace it with our new key and file
+  LAGOON_YML_CM=$(kubectl -n ${NAMESPACE} get configmap docker-compose-yaml -o json)
+  if [ "$(echo ${LAGOON_YML_CM} | jq -r '.data."docker-compose.yml" // false')" == "false" ]; then
+    # if the key doesn't exist, then just update the pre-deploy yaml only
+    kubectl -n ${NAMESPACE} get configmap docker-compose-yaml -o json | jq --arg add "`cat ${DOCKER_COMPOSE_YAML}`" '.data."pre-deploy" = $add' | kubectl apply -f -
+  else
+    # if the key does exist, then nuke it and put the new key
+    kubectl -n ${NAMESPACE} create configmap docker-compose-yaml --from-file=pre-deploy=${DOCKER_COMPOSE_YAML} -o yaml --dry-run=client | kubectl replace -f -
+  fi
+ else
+  # create it
+  kubectl -n ${NAMESPACE} create configmap docker-compose-yaml --from-file=pre-deploy=${DOCKER_COMPOSE_YAML}
+fi
 set -x
 
 # validate .lagoon.yml
@@ -176,9 +197,6 @@ currentStepEnd="$(date +"%Y-%m-%d %H:%M:%S")"
 patchBuildStep "${buildStartTime}" "${buildStartTime}" "${currentStepEnd}" "${NAMESPACE}" "initialSetup" "Initial Environment Setup"
 previousStepEnd=${currentStepEnd}
 set -x
-
-# Load path of docker-compose that should be used
-DOCKER_COMPOSE_YAML=($(cat .lagoon.yml | shyaml get-value docker-compose-yaml))
 
 DEPLOY_TYPE=$(cat .lagoon.yml | shyaml get-value environments.${BRANCH//./\\.}.deploy-type default)
 
@@ -547,6 +565,7 @@ if [[ "$BUILD_TYPE" == "pullrequest"  ||  "$BUILD_TYPE" == "branch" ]]; then
   BUILD_ARGS+=(--build-arg LAGOON_ENVIRONMENT_TYPE="${ENVIRONMENT_TYPE}")
   BUILD_ARGS+=(--build-arg LAGOON_BUILD_TYPE="${BUILD_TYPE}")
   BUILD_ARGS+=(--build-arg LAGOON_GIT_SOURCE_REPOSITORY="${SOURCE_REPOSITORY}")
+  BUILD_ARGS+=(--build-arg LAGOON_KUBERNETES="${KUBERNETES}")
 
   # Add in the cache args
   for value in "${LAGOON_CACHE_BUILD_ARGS[@]}"
@@ -661,26 +680,7 @@ set -x
 ##############################################
 
 if [ "${LAGOON_PREROLLOUT_DISABLED}" != "true" ]; then
-  COUNTER=0
-  while [ -n "$(cat .lagoon.yml | shyaml keys tasks.pre-rollout.$COUNTER 2> /dev/null)" ]
-  do
-    TASK_TYPE=$(cat .lagoon.yml | shyaml keys tasks.pre-rollout.$COUNTER)
-    echo $TASK_TYPE
-    case "$TASK_TYPE" in
-      run)
-          COMMAND=$(cat .lagoon.yml | shyaml get-value tasks.pre-rollout.$COUNTER.$TASK_TYPE.command)
-          SERVICE_NAME=$(cat .lagoon.yml | shyaml get-value tasks.pre-rollout.$COUNTER.$TASK_TYPE.service)
-          CONTAINER=$(cat .lagoon.yml | shyaml get-value tasks.pre-rollout.$COUNTER.$TASK_TYPE.container false)
-          SHELL=$(cat .lagoon.yml | shyaml get-value tasks.pre-rollout.$COUNTER.$TASK_TYPE.shell sh)
-          . /kubectl-build-deploy/scripts/exec-pre-tasks-run.sh
-          ;;
-      *)
-          echo "Task Type ${TASK_TYPE} not implemented"; exit 1;
-
-    esac
-
-    let COUNTER=COUNTER+1
-  done
+    build-deploy-tool tasks pre-rollout
 else
   echo "pre-rollout tasks are currently disabled LAGOON_PREROLLOUT_DISABLED is set to true"
 fi
@@ -703,24 +703,9 @@ mkdir -p $YAML_FOLDER
 BC_ROUTES_AUTOGENERATE_INSECURE=$(cat .lagoon.yml | shyaml get-value routes.insecure false)
 if [ ! $BC_ROUTES_AUTOGENERATE_INSECURE == "false" ]; then
   echo "=== routes.insecure is now defined in routes.autogenerate.insecure, pleae update your .lagoon.yml file"
-  ROUTES_AUTOGENERATE_INSECURE=$BC_ROUTES_AUTOGENERATE_INSECURE
-else
-  # By default we allow insecure traffic on autogenerate routes
-  ROUTES_AUTOGENERATE_INSECURE=$(cat .lagoon.yml | shyaml get-value routes.autogenerate.insecure Allow)
+  # update the .lagoon.yml with the new location for build-deploy-tool to read
+  yq3 write -i -- .lagoon.yml 'routes.autogenerate.insecure' $BC_ROUTES_AUTOGENERATE_INSECURE
 fi
-
-ROUTES_AUTOGENERATE_ENABLED=$(set -o pipefail; cat .lagoon.yml | shyaml get-value routes.autogenerate.enabled true | tr '[:upper:]' '[:lower:]')
-ROUTES_AUTOGENERATE_ALLOW_PRS=$(set -o pipefail; cat .lagoon.yml | shyaml get-value routes.autogenerate.allowPullrequests $ROUTES_AUTOGENERATE_ENABLED | tr '[:upper:]' '[:lower:]')
-if [[ "$TYPE" == "pullrequest" && "$ROUTES_AUTOGENERATE_ALLOW_PRS" == "true" ]]; then
-  ROUTES_AUTOGENERATE_ENABLED=true
-fi
-## fail silently if the key autogenerateRoutes doesn't exist and default to whatever ROUTES_AUTOGENERATE_ENABLED is set to
-ROUTES_AUTOGENERATE_BRANCH=$(set -o pipefail; cat .lagoon.yml | shyaml -q get-value environments.${BRANCH//./\\.}.autogenerateRoutes $ROUTES_AUTOGENERATE_ENABLED | tr '[:upper:]' '[:lower:]')
-if [[ "$ROUTES_AUTOGENERATE_BRANCH" == "true" ]]; then
-  ROUTES_AUTOGENERATE_ENABLED=true
-fi
-
-ROUTES_AUTOGENERATE_PREFIXES=$(yq3 r -C .lagoon.yml routes.autogenerate.prefixes.*)
 
 touch /kubectl-build-deploy/values.yaml
 
@@ -730,10 +715,6 @@ yq3 write -i -- /kubectl-build-deploy/values.yaml 'environmentType' $ENVIRONMENT
 yq3 write -i -- /kubectl-build-deploy/values.yaml 'namespace' $NAMESPACE
 yq3 write -i -- /kubectl-build-deploy/values.yaml 'gitSha' $LAGOON_GIT_SHA
 yq3 write -i -- /kubectl-build-deploy/values.yaml 'buildType' $BUILD_TYPE
-yq3 write -i -- /kubectl-build-deploy/values.yaml 'routesAutogenerateInsecure' $ROUTES_AUTOGENERATE_INSECURE
-yq3 write -i -- /kubectl-build-deploy/values.yaml 'routesAutogenerateEnabled' $ROUTES_AUTOGENERATE_ENABLED
-
-for i in $ROUTES_AUTOGENERATE_PREFIXES; do yq3 write -i -- /kubectl-build-deploy/values.yaml 'routesAutogeneratePrefixes[+]' $i; done
 yq3 write -i -- /kubectl-build-deploy/values.yaml 'kubernetes' $KUBERNETES
 yq3 write -i -- /kubectl-build-deploy/values.yaml 'lagoonVersion' $LAGOON_VERSION
 # check for ROOTLESS_WORKLOAD feature flag, disabled by default
@@ -933,6 +914,8 @@ set -x
 ### CREATE SERVICES, AUTOGENERATED ROUTES AND DBAAS CONFIG
 ##############################################
 
+build-deploy-tool template autogenerated-ingress
+
 for SERVICE_TYPES_ENTRY in "${SERVICE_TYPES[@]}"
 do
   echo "=== BEGIN route processing for service ${SERVICE_TYPES_ENTRY} ==="
@@ -948,96 +931,7 @@ do
   HELM_SERVICE_TEMPLATE="templates/service.yaml"
   if [ -f /kubectl-build-deploy/helmcharts/${SERVICE_TYPE}/$HELM_SERVICE_TEMPLATE ]; then
     cat /kubectl-build-deploy/values.yaml
-    helm template ${SERVICE_NAME} /kubectl-build-deploy/helmcharts/${SERVICE_TYPE} -s $HELM_SERVICE_TEMPLATE -f /kubectl-build-deploy/values.yaml "${HELM_ARGUMENTS[@]}" > $YAML_FOLDER/${SERVICE_NAME}.yaml
-  fi
-
-  if [ $ROUTES_AUTOGENERATE_ENABLED == "true" ]; then
-    HELM_INGRESS_TEMPLATE="templates/ingress.yaml"
-    if [ -f /kubectl-build-deploy/helmcharts/${SERVICE_TYPE}/$HELM_INGRESS_TEMPLATE ]; then
-
-      # The very first generated route is set as MAIN_GENERATED_ROUTE
-      if [ -z "${MAIN_GENERATED_ROUTE+x}" ]; then
-        MAIN_GENERATED_ROUTE=$SERVICE_NAME
-      fi
-
-      set +x
-      ROUTE_FASTLY_SERVICE_WATCH=false
-      # if the builddeploy controller is injecting a featureflag value, load it in
-      if [ -z $LAGOON_FASTLY_AUTOGENERATED_FEATURE_FLAG ]; then
-        LAGOON_FASTLY_AUTOGENERATED=$LAGOON_FASTLY_AUTOGENERATED_FEATURE_FLAG
-      fi
-      # if the lagoon api has an envvar override, use it instead
-      if [ ! -z "$LAGOON_PROJECT_VARIABLES" ]; then
-        LAGOON_FASTLY_AUTOGENERATED=($(echo $LAGOON_PROJECT_VARIABLES | jq -r '.[] | select(.name == "LAGOON_FASTLY_AUTOGENERATED") | "\(.value)"'))
-      fi
-      if [ ! -z "$LAGOON_ENVIRONMENT_VARIABLES" ]; then
-        TEMP_LAGOON_FASTLY_AUTOGENERATED=($(echo $LAGOON_ENVIRONMENT_VARIABLES | jq -r '.[] | select(.name == "LAGOON_FASTLY_AUTOGENERATED") | "\(.value)"'))
-        if [ ! -z $TEMP_LAGOON_FASTLY_AUTOGENERATED ]; then
-          LAGOON_FASTLY_AUTOGENERATED=$TEMP_LAGOON_FASTLY_AUTOGENERATED
-        fi
-      fi
-      set -x
-      # Create the fastly values required
-      FASTLY_ARGS=()
-      # if the feature is enabled, then do what is required to generated the labels/annotations etc
-      if [ ! -z $LAGOON_FASTLY_AUTOGENERATED ] && [ "$LAGOON_FASTLY_AUTOGENERATED" == "enabled" ]; then
-        # work out if there are any lagoon api variable overrides for the annotations that are being added
-        . /kubectl-build-deploy/scripts/exec-fastly-annotations.sh
-        # if we get any other populated service id overrides in any of the steps in exec-fastly-annotations.sh
-        # make it available to the ingress creation here by overriding what may be defined in the lagoon.yml
-        # `LAGOON_FASTLY_SERVICE_ID` is created in the exec-fastly-annotations.sh script
-        if [ ! -z "$LAGOON_FASTLY_SERVICE_ID" ]; then
-          ROUTE_FASTLY_SERVICE_ID=$LAGOON_FASTLY_SERVICE_ID
-          ROUTE_FASTLY_SERVICE_WATCH=$LAGOON_FASTLY_SERVICE_WATCH
-          if [ ! -z $LAGOON_FASTLY_SERVICE_API_SECRET ]; then
-            ROUTE_FASTLY_SERVICE_API_SECRET=$LAGOON_FASTLY_SERVICE_API_SECRET
-          fi
-        fi
-        if [ ! -z "$ROUTE_FASTLY_SERVICE_ID" ]; then
-          yq3 write -i -- /kubectl-build-deploy/values.yaml 'fastly.serviceId' $ROUTE_FASTLY_SERVICE_ID
-          FASTLY_ARGS+=(--set fastly.serviceId=${ROUTE_FASTLY_SERVICE_ID})
-          if [ ! -z "$ROUTE_FASTLY_SERVICE_API_SECRET" ]; then
-            if contains $FASTLY_API_SECRETS "${FASTLY_API_SECRET_PREFIX}${ROUTE_FASTLY_SERVICE_API_SECRET}"; then
-              yq3 write -i -- /kubectl-build-deploy/values.yaml 'fastly.apiSecretName' ${FASTLY_API_SECRET_PREFIX}${ROUTE_FASTLY_SERVICE_API_SECRET}
-              FASTLY_ARGS+=(--set fastly.apiSecretName=${FASTLY_API_SECRET_PREFIX}${ROUTE_FASTLY_SERVICE_API_SECRET})
-            else
-              echo "$ROUTE_FASTLY_SERVICE_API_SECRET requested, but not found in .lagoon.yml file"; exit 1;
-            fi
-          fi
-          ROUTE_FASTLY_SERVICE_WATCH=true
-        fi
-      fi
-
-      # @TODO: add the generator for autogenerated routes here
-      # finally template the autogenerated route
-      if [ ! -z "$LAGOON_PROJECT_VARIABLES" ]; then
-        LAGOON_SYSTEM_ROUTER_PATTERN=($(echo $LAGOON_PROJECT_VARIABLES | jq -r '.[] | select(.scope == "internal_system" and .name == "LAGOON_SYSTEM_ROUTER_PATTERN") | "\(.value)"'))
-      fi
-
-      touch /kubectl-build-deploy/${SERVICE_NAME}-values.yaml
-      if [ ! -z "$LAGOON_SYSTEM_ROUTER_PATTERN" ]; then
-        # new router pattern received
-        # source the new functions
-        . /kubectl-build-deploy/scripts/exec-autogenerated-pattern.sh
-        NEW_ROUTER_URL=$(routerPattern2DomainGenerator $LAGOON_SYSTEM_ROUTER_PATTERN $SERVICE_NAME $PROJECT $ENVIRONMENT)
-        NEW_SHORT_ROUTER_URL=$(generateShortUrl $LAGOON_SYSTEM_ROUTER_PATTERN $SERVICE_NAME $PROJECT $ENVIRONMENT)
-        yq3 write -i -- /kubectl-build-deploy/${SERVICE_NAME}-values.yaml 'autogeneratedRouteDomain' $NEW_ROUTER_URL
-        yq3 write -i -- /kubectl-build-deploy/${SERVICE_NAME}-values.yaml 'shortAutogeneratedRouteDomain' $NEW_SHORT_ROUTER_URL
-      else
-        # old router pattern received
-        # @DEPRECATE: eventually this should be removed
-        yq3 write -i -- /kubectl-build-deploy/${SERVICE_NAME}-values.yaml 'routesAutogenerateSuffix' $ROUTER_URL
-        yq3 write -i -- /kubectl-build-deploy/${SERVICE_NAME}-values.yaml 'routesAutogenerateShortSuffix' $SHORT_ROUTER_URL
-      fi
-
-      cat /kubectl-build-deploy/values.yaml >> /kubectl-build-deploy/${SERVICE_NAME}-values.yaml
-
-      yq3 write -i -- /kubectl-build-deploy/values.yaml 'fastly.watch' ${ROUTE_FASTLY_SERVICE_WATCH}
-      helm template ${SERVICE_NAME} /kubectl-build-deploy/helmcharts/${SERVICE_TYPE} \
-        -s $HELM_INGRESS_TEMPLATE \
-        "${FASTLY_ARGS[@]}" --set fastly.watch="${ROUTE_FASTLY_SERVICE_WATCH}" \
-        -f /kubectl-build-deploy/${SERVICE_NAME}-values.yaml "${HELM_ARGUMENTS[@]}" > $YAML_FOLDER/${SERVICE_NAME}.yaml
-    fi
+    helm template ${SERVICE_NAME} /kubectl-build-deploy/helmcharts/${SERVICE_TYPE} -s $HELM_SERVICE_TEMPLATE -f /kubectl-build-deploy/values.yaml "${HELM_ARGUMENTS[@]}" > $YAML_FOLDER/service-${SERVICE_NAME}.yaml
   fi
 
   HELM_DBAAS_TEMPLATE="templates/dbaas.yaml"
@@ -1045,7 +939,7 @@ do
     # Load the requested class and plan for this service
     DBAAS_ENVIRONMENT="${MAP_SERVICE_NAME_TO_DBAAS_ENVIRONMENT["${SERVICE_NAME}"]}"
     yq3 write -i -- /kubectl-build-deploy/${SERVICE_NAME}-values.yaml 'environment' $DBAAS_ENVIRONMENT
-    helm template ${SERVICE_NAME} /kubectl-build-deploy/helmcharts/${SERVICE_TYPE} -s $HELM_DBAAS_TEMPLATE -f /kubectl-build-deploy/values.yaml -f /kubectl-build-deploy/${SERVICE_NAME}-values.yaml "${HELM_ARGUMENTS[@]}" > $YAML_FOLDER/${SERVICE_NAME}.yaml
+    helm template ${SERVICE_NAME} /kubectl-build-deploy/helmcharts/${SERVICE_TYPE} -s $HELM_DBAAS_TEMPLATE -f /kubectl-build-deploy/values.yaml -f /kubectl-build-deploy/${SERVICE_NAME}-values.yaml "${HELM_ARGUMENTS[@]}" > $YAML_FOLDER/service-${SERVICE_NAME}.yaml
     DBAAS+=("${SERVICE_NAME}:${SERVICE_TYPE}")
   fi
 done
@@ -1062,8 +956,8 @@ TEMPLATE_PARAMETERS=()
 ### CUSTOM ROUTES
 ##############################################
 
-# Run the route generation script
-. /kubectl-build-deploy/scripts/exec-routes-generation.sh
+# Run the route generation process
+build-deploy-tool template ingress
 
 set +x
 currentStepEnd="$(date +"%Y-%m-%d %H:%M:%S")"
@@ -1100,17 +994,14 @@ set -x
 ### PROJECT WIDE ENV VARIABLES
 ##############################################
 
-# If we have a custom route, we use that as main route
-if [ "$MAIN_CUSTOM_ROUTE" ]; then
-  MAIN_ROUTE_NAME=$MAIN_CUSTOM_ROUTE
-# no custom route, we use the first generated route
-elif [ "$MAIN_GENERATED_ROUTE" ]; then
-  MAIN_ROUTE_NAME=$MAIN_GENERATED_ROUTE
-fi
-
-# Load the found main routes with correct schema
-if [ "$MAIN_ROUTE_NAME" ]; then
-  ROUTE=$(kubectl -n ${NAMESPACE} get ingress "$MAIN_ROUTE_NAME" -o=go-template --template='{{if .spec.tls}}https://{{else}}http://{{end}}{{(index .spec.rules 0).host}}')
+# identify primary-ingress scans the builds autogenerated and custom ingresses looking for the `main` route
+# scans autogen, custom defined, and finally activestandby. first in the list is always returned for each state with each
+# step overwriting the previous so only 1 ingress is returned
+# previous check looked for `spec.tls` which always exists in our kubernetes templates
+# so just add https...
+ROUTE=$(build-deploy-tool identify primary-ingress)
+if [ ! -z "${ROUTE}" ]; then
+  ROUTE=${ROUTE}
 fi
 
 # Load all routes with correct schema and comma separated
@@ -1508,26 +1399,7 @@ set -x
 
 # if we have LAGOON_POSTROLLOUT_DISABLED set, don't try to run any pre-rollout tasks
 if [ "${LAGOON_POSTROLLOUT_DISABLED}" != "true" ]; then
-  COUNTER=0
-  while [ -n "$(cat .lagoon.yml | shyaml keys tasks.post-rollout.$COUNTER 2> /dev/null)" ]
-  do
-    TASK_TYPE=$(cat .lagoon.yml | shyaml keys tasks.post-rollout.$COUNTER)
-    echo $TASK_TYPE
-    case "$TASK_TYPE" in
-      run)
-          COMMAND=$(cat .lagoon.yml | shyaml get-value tasks.post-rollout.$COUNTER.$TASK_TYPE.command)
-          SERVICE_NAME=$(cat .lagoon.yml | shyaml get-value tasks.post-rollout.$COUNTER.$TASK_TYPE.service)
-          CONTAINER=$(cat .lagoon.yml | shyaml get-value tasks.post-rollout.$COUNTER.$TASK_TYPE.container false)
-          SHELL=$(cat .lagoon.yml | shyaml get-value tasks.post-rollout.$COUNTER.$TASK_TYPE.shell sh)
-          . /kubectl-build-deploy/scripts/exec-tasks-run.sh
-          ;;
-      *)
-          echo "Task Type ${TASK_TYPE} not implemented"; exit 1;
-
-    esac
-
-    let COUNTER=COUNTER+1
-  done
+  build-deploy-tool tasks post-rollout
 else
   echo "post-rollout tasks are currently disabled LAGOON_POSTROLLOUT_DISABLED is set to true"
 fi
@@ -1550,6 +1422,14 @@ if kubectl -n ${NAMESPACE} get configmap lagoon-yaml &> /dev/null; then
  else
   # create it
   kubectl -n ${NAMESPACE} create configmap lagoon-yaml --from-file=post-deploy=.lagoon.yml
+fi
+echo "Updating docker-compose-yaml configmap with a post-deploy version of the docker-compose.yml file"
+if kubectl -n ${NAMESPACE} get configmap docker-compose-yaml &> /dev/null; then
+  # replace it, no need to check if the key is different, as that will happen in the pre-deploy phase
+  kubectl -n ${NAMESPACE} get configmap docker-compose-yaml -o json | jq --arg add "`cat ${DOCKER_COMPOSE_YAML}`" '.data."post-deploy" = $add' | kubectl apply -f -
+ else
+  # create it
+  kubectl -n ${NAMESPACE} create configmap docker-compose-yaml --from-file=post-deploy=${DOCKER_COMPOSE_YAML}
 fi
 set -x
 
@@ -1577,4 +1457,30 @@ if [ "$(featureFlag INSIGHTS)" = enabled ]; then
   patchBuildStep "${buildStartTime}" "${previousStepEnd}" "${currentStepEnd}" "${NAMESPACE}" "insightsCompleted" "Insights Gathering"
   previousStepEnd=${currentStepEnd}
 fi
+set -x
+
+set +x
+##############################################
+### RUN docker compose config check against the provided docker-compose file
+### use the `build-deploy-tool` built in validater to run over the provided docker-compose file
+##############################################
+dccOutput=$(bash -c 'build-deploy-tool validate docker-compose --docker-compose '${DOCKER_COMPOSE_YAML}' --ignore-non-string-key-errors=false; exit $?' 2>&1)
+dccExit=$?
+if [ "${dccExit}" != "0" ]; then
+  echo "
+##############################################
+Warning!
+There are issues with your docker compose file that lagoon uses that should be fixed.
+This does not currently prevent builds from proceeding, but future versions of Lagoon *will* be more strict on issues shown here.
+The following is output from \`build-deploy-tool validate docker-compose --docker-compose '${DOCKER_COMPOSE_YAML}' --ignore-non-string-key-errors=false\` which you can run locally to verify and fix.
+##############################################
+"
+  echo ${dccOutput}
+  echo "
+##############################################"
+  currentStepEnd="$(date +"%Y-%m-%d %H:%M:%S")"
+  patchBuildStep "${buildStartTime}" "${previousStepEnd}" "${currentStepEnd}" "${NAMESPACE}" "dockerComposeValidation" "Docker Compose Validation"
+  previousStepEnd=${currentStepEnd}
+fi
+
 set -x
