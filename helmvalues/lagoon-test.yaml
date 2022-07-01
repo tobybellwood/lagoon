@@ -1,6 +1,6 @@
 imageTag: main
 ingressIP: 172.17.0.2
-keycloakAuthServerClientSecret: 64ad81b4-e5d9-4940-9f84-27f8743919fa
+keycloakAuthServerClientSecret: 2da72b5c-f97f-4d6a-93cf-2a8996ee50d4
 routeSuffixHTTP: 172.17.0.2.nip.io
 routeSuffixHTTPS: 172.17.0.2.nip.io
 # sshPortalHost: lagoon-remote-ssh-portal
