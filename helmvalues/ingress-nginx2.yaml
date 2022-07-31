@@ -1,0 +1,13 @@
+controller:
+  service:
+    type: NodePort
+    nodePorts:
+      http: "32081"
+      https: "32444"
+  config:
+    proxy-body-size: 100m
+  ingressClassResource:
+    enabled: true
+    name: nginx2
+  ingressClass: nginx2
+  ingressClassByName: true

@@ -99,7 +99,7 @@ microk8s helm3 upgrade --install --create-namespace --namespace lagoon-logging -
 # microk8s
 
 # Install microk8s and enable addons
-sudo snap install microk8s --classic --channel=1.20/stable
+sudo snap install microk8s --classic --channel=1.23/stable
 microk8s enable dns helm3 metrics-server storage
 
 # get the IP for the microk8s node
@@ -110,6 +110,7 @@ microk8s kubectl get nodes -o custom-columns=IP:.status.addresses
 # [plugins."io.containerd.grpc.v1.cri".registry.mirrors ...
 # [plugins."io.containerd.grpc.v1.cri".registry.configs ...
 sudo microk8s stop && sudo microk8s start
+(Linux) find  /var/snap/microk8s/current/args -type f | xargs sed -i "s/172.17.0.2/{your_ip}/g"
 
 # Replace storageclass with bulk and standard storageclasses - you don't need the nfs-server-provisioner helm chart on microk8s
 microk8s kubectl apply -f ${PWD}/helmvalues/microk8s-storageclass.yaml

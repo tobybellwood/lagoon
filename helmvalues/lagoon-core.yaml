@@ -3,10 +3,11 @@
 
 imageTag: main
 
+defaultIngressClassName: nginx
+
 harborURL: https://disabled-only-uses-harbors-via-deploy-controller.com
 harborAdminPassword: not-needed
 registry: none.com
-
 
 elasticsearchURL: https://opendistro.opendistro.svc.cluster.local:9200
 kibanaURL: http://opendistro-kibana.opendistro.svc.cluster.local:5601
