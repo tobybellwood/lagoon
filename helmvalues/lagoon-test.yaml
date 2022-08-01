@@ -31,7 +31,7 @@ tests:
     # - drupal-php80
     # - drupal-postgres
     # - drush
-    - elasticsearch
+    # - elasticsearch
     # - features-api-variables
     # - features-kubernetes-2
     # - features-kubernetes
@@ -43,7 +43,7 @@ tests:
     # - node-mongodb
     # - node-various
     - node
-    - python
+    # - python
     # - ssh-portal
     # - tasks
     # - workflows
