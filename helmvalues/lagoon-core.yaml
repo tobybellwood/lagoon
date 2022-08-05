@@ -31,6 +31,7 @@ rabbitMQPassword: xogie5lae8IoshugahcoeThakiequo3I
 # This sets the same authserver client secret in lagoon-core and lagoon-test
 keycloakAuthServerClientSecret: 2da72b5c-f97f-4d6a-93cf-2a8996ee50d4
 
+#overwriteActiveStandbyTaskImage: registry.172.17.0.2.nip.io:32080/library/lagoon/task-activestandby:latest
 overwriteKubectlBuildDeployDindImage:
 
 # used in ui
