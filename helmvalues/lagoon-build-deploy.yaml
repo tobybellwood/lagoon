@@ -13,7 +13,7 @@ extraArgs:
   - "--harbor-username=admin"
   - "--harbor-password=Harbor12345"
   - "--enable-qos"
-  - "--qos-max-builds=15"
+  - "--qos-max-builds=5"
 
 # image:
 #   repository: uselagoon/remote-controller

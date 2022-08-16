@@ -24,7 +24,7 @@ tests:
     # - active-standby-kubernetes
     # - api
     # - bitbucket
-    # - bulkdeployment
+    # - bulk-deployment
     # - dbaas
     # - deploytarget
     # - drupal-php74

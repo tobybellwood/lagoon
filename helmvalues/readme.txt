@@ -35,15 +35,15 @@ microk8s helm3 repo add lagoon https://uselagoon.github.io/lagoon-charts/
 microk8s helm3 repo update
 
 # Install the cluster prerequisites (currently version pinned)
-microk8s helm3 upgrade --install --create-namespace --namespace ingress-nginx --wait --timeout 30m --version 4.1.3 ingress-nginx ingress-nginx/ingress-nginx -f ${PWD}/helmvalues/ingress-nginx.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace registry --wait --timeout 30m --version 1.9.1 registry harbor/harbor -f ${PWD}/helmvalues/registry.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace nfs-server-provisioner --wait --timeout 30m --version 1.1.3 nfs-server-provisioner stable/nfs-server-provisioner -f ${PWD}/helmvalues/nfs-server-provisioner.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace minio --wait --timeout 30m --version 11.6.3 minio bitnami/minio -f ${PWD}/helmvalues/minio.yaml
+microk8s helm upgrade --install --create-namespace --namespace ingress-nginx --wait --timeout 30m --version 4.2.1 ingress-nginx ingress-nginx/ingress-nginx -f ${PWD}/helmvalues/ingress-nginx.yaml
+microk8s helm upgrade --install --create-namespace --namespace registry --wait --timeout 30m --version 1.9.3 registry harbor/harbor -f ${PWD}/helmvalues/registry.yaml
+microk8s helm upgrade --install --create-namespace --namespace nfs-server-provisioner --wait --timeout 30m --version 1.1.3 nfs-server-provisioner stable/nfs-server-provisioner -f ${PWD}/helmvalues/nfs-server-provisioner.yaml
+microk8s helm upgrade --install --create-namespace --namespace minio --wait --timeout 30m --version 11.8.1 minio bitnami/minio -f ${PWD}/helmvalues/minio.yaml
 
 # Install the DBaaS databases as required
-microk8s helm3 upgrade --install --create-namespace --namespace mariadb --wait --timeout 30m --version=10.5.1 mariadb bitnami/mariadb -f ${PWD}/helmvalues/dbaas.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace postgresql --wait --timeout 30m --version=10.16.2 postgresql bitnami/postgresql -f ${PWD}/helmvalues/dbaas.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace mongodb --wait --timeout 30m --version=11.2.0 mongodb bitnami/mongodb -f ${PWD}/helmvalues/dbaas.yaml
+microk8s helm upgrade --install --create-namespace --namespace mariadb --wait --timeout 30m --version=11.1.7 mariadb bitnami/mariadb -f ${PWD}/helmvalues/dbaas.yaml
+microk8s helm upgrade --install --create-namespace --namespace postgresql --wait --timeout 30m --version=11.7.1 postgresql bitnami/postgresql -f ${PWD}/helmvalues/dbaas.yaml
+microk8s helm upgrade --install --create-namespace --namespace mongodb --wait --timeout 30m --version=11.2.0 mongodb bitnami/mongodb -f ${PWD}/helmvalues/dbaas.yaml
 
 # Install the Lagoon components
 microk8s helm3 upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-core lagoon/lagoon-core -f ${PWD}/helmvalues/lagoon-core.yaml
@@ -91,10 +91,10 @@ microk8s helm3 upgrade --install --create-namespace --namespace lagoon --wait --
 # Lagoon Logging
 
 docker-compose -f local-dev/odfe-docker-compose.yml -p odfe up -d
-microk8s kubectl apply -f ${PWD}/helmvalues/opensearch-externalname.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace lagoon-logs-concentrator --wait --timeout 15m lagoon-logs-concentrator lagoon/lagoon-logs-concentrator --values ./local-dev/lagoon-logs-concentrator.values.yaml
-microk8s helm3 upgrade --install --create-namespace --namespace lagoon-logging --wait --timeout 15m lagoon-logging lagoon/lagoon-logging --values ./local-dev/lagoon-logging.values.yaml
+#k8up
 
+microk8s helm upgrade --install --create-namespace --namespace k8up --version 1.1.0 -f ${PWD}/helmvalues/k8up-values.yaml k8up appuio/k8up
+microk8s kubectl apply -f https://github.com/vshn/k8up/releases/download/v1.1.0/k8up-crd.yaml
 
 # microk8s
 
