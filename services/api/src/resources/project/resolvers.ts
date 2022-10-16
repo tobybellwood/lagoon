@@ -14,6 +14,8 @@ import { Sql as sshKeySql } from '../sshKey/sql';
 import { createHarborOperations } from './harborSetup';
 import sql from '../user/sql';
 
+const DISABLE_CORE_HARBOR = process.env.DISABLE_CORE_HARBOR || "false"
+
 const isAdminCheck = async (hasPermission) => {
   try {
     // check user is admin
@@ -416,12 +418,13 @@ export const addProject = async (
     }
   }
 
-  const harborOperations = createHarborOperations(sqlClientPool);
-
-  await harborOperations.addProject(project.name, project.id);
+  if (DISABLE_CORE_HARBOR == "false") {
+    const harborOperations = createHarborOperations(sqlClientPool);
+    await harborOperations.addProject(project.name, project.id);
+  }
 
   userActivityLogger(`User added a project '${project.name}'`, {
-    project: project.name,
+    project: '',
     event: 'api:addProject',
     payload: {
       input,
@@ -444,6 +447,18 @@ export const deleteProject: ResolverFn = async (
   await hasPermission('project', 'delete', {
     project: pid
   });
+
+  // check for existing environments
+  const rows = await query(
+    sqlClientPool, Sql.selectEnvironmentsByProjectId(pid)
+  );
+
+  if (rows.length > 0) {
+    // throw error if there are any existing environments
+    throw new Error(
+      'Unable to delete project, there are existing environments that need to be removed first'
+    );
+  }
 
   await Helpers(sqlClientPool).deleteProjectById(pid);
 
@@ -475,12 +490,13 @@ export const deleteProject: ResolverFn = async (
   }
 
   // @TODO discuss if we want to delete projects in harbor or not
-  //const harborOperations = createHarborOperations(sqlClientPool);
-
-  //const harborResults = await harborOperations.deleteProject(project.name)
+  // if (DISABLE_CORE_HARBOR == "false") {
+  //   const harborOperations = createHarborOperations(sqlClientPool);
+  //   const harborResults = await harborOperations.deleteProject(project.name)
+  // }
 
   userActivityLogger(`User deleted a project '${project.name}'`, {
-    project: project.name,
+    project: '',
     event: 'api:deleteProject',
     payload: {
       input: {
@@ -698,9 +714,10 @@ export const updateProject: ResolverFn = async (
   // }
 
   userActivityLogger(`User updated project '${oldProject.name}'`, {
-    project: oldProject.name,
+    project: '',
     event: 'api:updateProject',
     payload: {
+      project: oldProject.name,
       patch: {
         name,
         gitUrl,
