@@ -75,7 +75,7 @@ jobs:
         helm upgrade --install --create-namespace --namespace mongodb --wait --timeout 10m --version=11.2.0 mongodb bitnami/mongodb -f helmvalues/dbaas.yaml
     - name: Install Lagoon
       run: |
-        helm upgrade --install --create-namespace --namespace lagoon --wait --timeout 20m lagoon-core lagoon/lagoon-core -f helmvalues/lagoon-core.yaml
+        helm upgrade --install --create-namespace --namespace lagoon --wait --timeout 30m lagoon-core lagoon/lagoon-core -f helmvalues/lagoon-core.yaml
         helm upgrade --install --create-namespace --namespace lagoon --wait --timeout 10m lagoon-build-deploy lagoon/lagoon-build-deploy -f helmvalues/lagoon-build-deploy.yaml
         helm upgrade --install --create-namespace --namespace lagoon --wait --timeout 10m --debug lagoon-remote lagoon/lagoon-remote -f helmvalues/lagoon-remote.yaml
     - name: Check that keycloak is ready
