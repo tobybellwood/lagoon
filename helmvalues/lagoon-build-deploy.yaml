@@ -19,9 +19,6 @@ extraArgs:
 #   repository: uselagoon/remote-controller
 #   tag: v0.2.2
 
-# overrideBuildDeployImage: registry.172.17.0.2.nip.io:32080/library/lagoon/kubectl-build-deploy-dind:latest
-overrideBuildDeployImage: testlagoon/kubectl-build-deploy-dind:main
-
 rootlessBuildPods: false
 lagoonFeatureFlagForceInsights: enabled
 lagoonFeatureFlagDefaultRootlessWorkload: enabled

@@ -67,8 +67,12 @@ docker run \
     -e JWTUSER=localadmin \
     uselagoon/tests \
     python3 /ansible/tasks/api/admin_token.py
-echo $(microk8s kubectl get secret -n lagoon lagoon-core-keycloak -o jsonpath="{.data.KEYCLOAK_ADMIN_PASSWORD}" | base64 --decode)
-echo $(microk8s kubectl get secret -n lagoon lagoon-core-keycloak -o jsonpath="{.data.KEYCLOAK_LAGOON_ADMIN_PASSWORD}" | base64 --decode)
+# Use these to create LoadBalancers for the api-db and ssh services - works on k3s, not sure about microk8s
+kubectl patch service -n lagoon lagoon-core-api-db  -p '{"spec":{"type":"LoadBalancer"}}'
+kubectl get service -n lagoon lagoon-core-api-db -o jsonpath='{.spec.ports[].nodePort}{"\n"}'
+kubectl get secret -n lagoon lagoon-core-api-db -o jsonpath="{.data.API_DB_PASSWORD}" | base64 --decode
+kubectl patch service -n lagoon lagoon-core-ssh  -p '{"spec":{"type":"LoadBalancer"}}'
+kubectl get service -n lagoon lagoon-core-ssh -o jsonpath='{.spec.ports[].nodePort}{"\n"}'
 
 # Use these to delete CRDs from namespaces if they're holding up deletions
 kubectl get LagoonTasks -A | awk '{printf "kubectl -n %s patch LagoonTasks %s -p \047{\"metadata\":{\"finalizers\":null}}\047 --type=merge\n", $1, $2}' | bash

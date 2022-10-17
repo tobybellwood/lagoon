@@ -38,6 +38,13 @@ overwriteKubectlBuildDeployDindImage:
 lagoonAPIURL: http://lagoon-api.172.17.0.2.nip.io:32080/graphql
 keycloakAPIURL: http://lagoon-keycloak.172.17.0.2.nip.io:32080/auth
 
+buildDeployImage:
+  default:
+    image: uselagoon/build-deploy-image:latest
+  edge:
+    enabled: true
+    image: uselagoon/build-deploy-image:edge
+
 api:
   replicaCount: 1
   image:
@@ -50,6 +57,9 @@ api:
     - host: lagoon-api.172.17.0.2.nip.io
       paths:
       - /
+  additionalEnvs:
+    DISABLE_CORE_HARBOR: true
+    OPENSEARCH_INTEGRATION_ENABLED: false
 
 apiDB:
   replicaCount: 1
@@ -101,7 +111,7 @@ controllerhandler:
 drushAlias:
   replicaCount: 1
   image:
-    repository: testlagoon/drush-alias
+    repository: uselagoon/drush-alias
 
 keycloak:
   replicaCount: 1
@@ -122,51 +132,22 @@ insightsHandler:
   additionalEnvs:
     S3_USESSL: 'false'
 
-
 keycloakDB:
   replicaCount: 1
   image:
     repository: testlagoon/keycloak-db
 
-logs2s3:
+logs2notifications:
   replicaCount: 1
   image:
-    repository: testlagoon/logs2s3
-
-logs2email:
-  replicaCount: 1
-  image:
-    repository: testlagoon/logs2email
-  enabled: false
-
-logs2microsoftteams:
-  replicaCount: 1
-  image:
-    repository: testlagoon/logs2microsoftteams
-  enabled: false
-
-logs2rocketchat:
-  replicaCount: 1
-  image:
-    repository: testlagoon/logs2rocketchat
-  enabled: false
-
-logs2slack:
-  replicaCount: 1
-  image:
-    repository: testlagoon/logs2slack
-  enabled: false
-
-logs2webhook:
-  replicaCount: 1
-  image:
-    repository: testlagoon/logs2webhook
-  enabled: false
+    repository: testlagoon/logs2notifications
 
 ssh:
   replicaCount: 1
   image:
     repository: testlagoon/ssh
+  service:
+    type: LoadBalancer
   ingress:
     enabled: true
     hosts:
@@ -193,8 +174,6 @@ storageCalculator:
 
 ui:
   replicaCount: 1
-  image:
-    repository: testlagoon/ui
   ingress:
     enabled: true
     hosts:
