@@ -12,14 +12,14 @@ type funcType func() map[string]string
 func main() {
 
 	handler := http.HandlerFunc(handleReq)
-	mariaHandler := http.HandlerFunc(mariaHandler)
+	mariadbHandler := http.HandlerFunc(mariadbHandler)
 	postgresHandler := http.HandlerFunc(postgresHandler)
 	solrHandler := http.HandlerFunc(solrHandler)
 	redisHandler := http.HandlerFunc(redisHandler)
 	opensearchHandler := http.HandlerFunc(opensearchHandler)
 	mongoHandler := http.HandlerFunc(mongoHandler)
 	http.Handle("/", handler)
-	http.Handle("/maria", mariaHandler)
+	http.Handle("/mariadb", mariadbHandler)
 	http.Handle("/postgres", postgresHandler)
 	http.Handle("/solr", solrHandler)
 	http.Handle("/redis", redisHandler)

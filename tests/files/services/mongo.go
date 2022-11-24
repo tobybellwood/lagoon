@@ -16,9 +16,12 @@ import (
 )
 
 var (
-	mongodb_host = os.Getenv("MONGODB_HOST")
-	mongodb_port = 27017
-	mongoURI     = fmt.Sprintf("%s://%s:%d", mongodb_host, mongodb_host, mongodb_port)
+	mongoUser = os.Getenv("MONGO_USERNAME")
+	mongoPassword = os.Getenv("MONGO_PASSWORD")
+	mongoHost = os.Getenv("MONGO_HOST")
+	mongoDB = os.Getenv("MONGO_DATABASE")
+	mongoPort = 27017
+	mongoURI     = fmt.Sprintf("mongodb://%s:%s@%s:%d/%s", mongoUser, mongoPassword, mongoHost, mongoPort, mongoDB)
 )
 
 func mongoHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +43,7 @@ func cleanMongoOutput(docs []primitive.M) string {
 		v := strings.SplitN(value, " ", 2)
 		fmt.Fprintf(b, "\"%s=%s\"\n", v[0], v[1])
 	}
-	mongoOutput := mongodb_host + "\n" + b.String()
+	mongoOutput := mongoHost + "\n" + b.String()
 	return mongoOutput
 }
 
@@ -50,7 +53,7 @@ func mongoConnector() string {
 		panic(err)
 	}
 
-	envCollection := client.Database("testing").Collection("env-vars")
+	envCollection := client.Database(mongoDB).Collection("env-vars")
 
 	deleteFilter := bson.D{{}}
 	_, err = envCollection.DeleteMany(context.TODO(), deleteFilter)
