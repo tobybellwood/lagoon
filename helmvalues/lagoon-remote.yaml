@@ -1,5 +1,10 @@
 imageTag: main
 
+global:
+  rabbitMQUsername: lagoon
+  rabbitMQPassword: xogie5lae8IoshugahcoeThakiequo3I
+  rabbitMQHostname: lagoon-core-broker
+
 lagoon-build-deploy:
 # this is being installed via a separate chart for now
   enabled: false
@@ -11,11 +16,8 @@ dockerHost:
   storage:
     size: 50Gi
 
-lagoon-insights-remote:
+insightsRemote:
   enabled: true
-  rabbitMQUsername: lagoon
-  rabbitMQPassword: xogie5lae8IoshugahcoeThakiequo3I
-  rabbitMQHostname: lagoon-core-broker
 
 lagoon-gatekeeper:
   enabled: false
@@ -102,14 +104,10 @@ natsConfig:
         AwEHoUQDQgAEJqD67BGaVtpzW7mFSsK9IAY5bPsI/zDCGO+zhSJhDS44duAbmWCB
         OuWKcMfdfO7LdHmssdwG8RsUsAx7t7qmhQ==
         -----END EC PRIVATE KEY-----
+
 sshPortal:
   enabled: true
   replicaCount: 1
-  image:
-    repository: ghcr.io/uselagoon/lagoon-ssh-portal/ssh-portal
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "v0.15.0"
   debug: true
   service:
     type: NodePort
@@ -124,3 +122,9 @@ sshPortal:
       AAAECW61aE011GKLSFBJ82G6oGEOjJSUV3STx16veSvX38kD9iqXNt1OpHncEdwOG8/QRV
       6lnrpkhPYdpdKnF3PCEyAAAAAAECAwQF
       -----END OPENSSH PRIVATE KEY-----
+
+storageCalculator:
+  enabled: true
+  image:
+    repository: uselagoon/remote-calculator
+    tag: main

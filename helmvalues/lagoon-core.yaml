@@ -103,11 +103,6 @@ broker:
       paths:
       - /
 
-controllerhandler:
-  replicaCount: 1
-  image:
-    repository: testlagoon/controllerhandler
-
 drushAlias:
   replicaCount: 1
   image:
@@ -158,19 +153,9 @@ ssh:
 sshPortalAPI:
   replicaCount: 1
   enabled: true
-  image:
-    repository: ghcr.io/uselagoon/lagoon-ssh-portal/ssh-portal-api
-    pullPolicy: Always
-    tag: "v0.15.0"
   debug: true
   serviceMonitor:
     enabled: false
-
-storageCalculator:
-  replicaCount: 1
-  image:
-    repository: testlagoon/storage-calculator
-  enabled: true
 
 ui:
   replicaCount: 1

@@ -26,14 +26,9 @@ tests:
     # - api
     # - bitbucket
     # - bulk-deployment
-    # - dbaas
     # - deploytarget
-    # - drupal-php74
-    # - drupal-php80
-    # - drupal-postgres
     # - drush
-    # - elasticsearch
-    # - features-api-variables
+    # - features-variables
     # - features-kubernetes-2
     # - features-kubernetes
     # - generic
@@ -41,10 +36,9 @@ tests:
     # - gitlab
     # - image-cache
     # - nginx
-    # - node-mongodb
-    # - node-various
-    - node
+    # - node
     # - python
+    - services
     # - ssh-portal
     # - tasks
     # - workflows
