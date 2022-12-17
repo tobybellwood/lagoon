@@ -55,8 +55,13 @@ jobs:
         # queries: security-extended,security-and-quality
 
     - if: matrix.language == 'go'
-      name: Autobuild
-      uses: github/codeql-action/autobuild@v2
+      name: Build golang
+      run: |
+        cd services/logs2notifications/ && go build main.go && cd -
+        cd services/actions-handler/ && go build main.go && cd -
+        cd services/backup-handler/ && go build main.go && cd -
+        cd services/workflows/ && go build main.go && cd -
+        cd taskimages/activestandby/ && go build main.go && cd -
 
     - if: matrix.language == 'javascript' 
       name: Build Javascript
