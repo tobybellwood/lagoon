@@ -66,8 +66,8 @@ jobs:
     - if: matrix.language == 'javascript' 
       name: Build Javascript
       run: |
-        yarn install
-        yarn build
+        yarn install --frozen-lockfile
+        cd node-packages/commons && yarn build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
