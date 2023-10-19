@@ -1,21 +1,21 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base"
+  "$schema":"https://docs.renovatebot.com/renovate-schema.json",
+  "extends":["config:base"],
+  "packageRules":[
+    {
+      "groupName":"Golang module updates",
+      "matchManagers":["gomod"]
+    },
+    {
+      "matchManagers":["github-actions"],
+      "groupName":"GitHub actions"
+    },
+    {
+      "groupName":"npm package updates (disabled)",
+      "matchManagers":["npm"],
+      "enabled":false
+    }
   ],
-  "packageRules": [
-      {
-          "groupName": "Golang module updates",
-          "matchManagers": ["gomod"]
-      },
-      {
-          "groupName": "npm package updates (disabled)",
-          "matchManagers": ["npm"],
-          "enabled": false
-      }
-  ],
-  "constraints": {
-    "go": "1.21"
-  },
-  "postUpdateOptions": ["gomodTidy"]
+  "constraints":{"go":"1.21"},
+  "postUpdateOptions":["gomodTidy"]
 }
