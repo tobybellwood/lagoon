@@ -1,6 +1,10 @@
 {
     "$schema":"https://docs.renovatebot.com/renovate-schema.json",
     "extends":["config:base"],
+    "dependencyDashboard": true,
+    "separateMajorMinor": true,
+    "separateMinorPatch": true,
+    "separateMultipleMajor": true,
     "packageRules":[
       {
         "groupName":"Golang module updates",
@@ -19,6 +23,11 @@
       {
         "matchManagers":["composer"],
         "groupName":"PHP Composer",
+        "enabled":false
+      },
+      {
+        "matchManagers":["maven","maven-wrapper"],
+        "groupName":"maven",
         "enabled":false
       },
       {
