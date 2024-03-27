@@ -21,6 +21,9 @@
   "keywords": [],
   "author": "amazee.io <hello@amazee.io> (http://www.amazee.io)",
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@lagoon/commons": "4.0.0",
     "@supercharge/request-ip": "^1.1.2",

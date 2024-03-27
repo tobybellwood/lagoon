@@ -24,6 +24,9 @@
     "exec": "yarn build --incremental && yarn start --inspect=0.0.0.0:9229"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@lagoon/commons": "4.0.0",
     "amqp-connection-manager": "^1.3.5",

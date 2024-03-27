@@ -11,6 +11,9 @@
     "node-packages/*",
     "services/*"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
     "prettier": "^3.2.5",
     "yarn-audit-fix": "^10.0.7"

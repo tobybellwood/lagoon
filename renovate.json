@@ -1,0 +1,32 @@
+{
+    "$schema":"https://docs.renovatebot.com/renovate-schema.json",
+    "extends":["config:base"],
+    "packageRules":[
+      {
+        "groupName":"Golang module updates",
+        "matchManagers":["gomod"],
+        "enabled":false
+      },
+      {
+        "matchManagers":["github-actions"],
+        "groupName":"GitHub actions"
+      },
+      {
+        "matchManagers":["dockerfile"],
+        "groupName":"Dockerfile",
+        "enabled":false
+      },
+      {
+        "matchManagers":["composer"],
+        "groupName":"PHP Composer",
+        "enabled":false
+      },
+      {
+        "groupName":"npm package updates",
+        "matchManagers":["npm"],
+        "enabled":true
+      }
+    ],
+    "constraints":{"go":"1.21"},
+    "postUpdateOptions":["gomodTidy","yarnDedupeHighest"]
+  }

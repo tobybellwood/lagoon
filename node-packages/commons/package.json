@@ -10,6 +10,9 @@
     "lint": "../eslint-config-lagoon-node/node_modules/.bin/eslint .",
     "test": "jest"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
     "@types/amqp-connection-manager": "^2.0.12",
     "@types/jest": "^29.5.12",

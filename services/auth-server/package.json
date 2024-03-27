@@ -24,6 +24,9 @@
     "ext": "js,ts,json",
     "exec": "yarn build && yarn start --inspect=0.0.0.0:9229"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "axios": "^0.21.1",
     "body-parser": "^1.18.2",
