@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@lagoon/commons": "4.0.0",
-    "amqp-connection-manager": "^1.4.2",
+    "amqp-connection-manager": "^4.0.0",
     "amqplib": "^0.7.1",
     "async-retry": "^1.2.3",
     "ramda": "0.25.0",
