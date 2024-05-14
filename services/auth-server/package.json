@@ -28,13 +28,13 @@
     "node": ">=20"
   },
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.28.0",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.9.0",
     "nano": "^6.4.3",
-    "ramda": "0.25.0",
+    "ramda": "0.30.0",
     "sshpk": "^1.14.1",
     "winston": "^3"
   },
