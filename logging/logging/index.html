@@ -16,7 +16,7 @@
         <link rel="prev" href="../../interacting/rbac/">
       
       
-        <link rel="next" href="../kibana-examples/">
+        <link rel="next" href="../../installing-lagoon/requirements/">
       
       
       <link rel="icon" href="../../images/lagoon-icon.png">
@@ -710,6 +710,26 @@
   
   <span class="md-ellipsis">
     Service Types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts-advanced/storage-types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Storage Types
   </span>
   
 
@@ -3095,26 +3115,6 @@
 
               
             
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../kibana-examples/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Kibana Examples
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -4135,6 +4135,46 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/2.24.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.24.0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/2.23.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.23.0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/2.22.0/" class="md-nav__link">
         
   
@@ -4618,7 +4658,7 @@
 
 
 <h1 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">#</a></h1>
-<p>Lagoon provides access to the following logs via Kibana:</p>
+<p>Lagoon provides access to the following logs:</p>
 <ul>
 <li>Logs from the Kubernetes Routers, including every single HTTP and HTTPS request with:<ul>
 <li>Source IP</li>
@@ -4650,19 +4690,21 @@
 <li>Application logs:<ul>
 <li>For Drupal: install the <a href="https://www.drupal.org/project/lagoon_logs">Lagoon Logs</a> module in order to receive logs from Drupal Watchdog.</li>
 <li>For Laravel: install the <a href="https://github.com/amazeeio/laravel_lagoon_logs">Lagoon Logs for Laravel</a> package.</li>
+<li>For Ruby: see our <a href="../../applications/ruby/#logging">Ruby logging example</a>.</li>
 <li>For other workloads:<ul>
 <li>Send logs to <code>udp://application-logs.lagoon.svc:5140</code></li>
 <li>Ensure logs are structured as JSON encoded objects.</li>
-<li>Ensure the <code>type</code> field contains the name of the Kubernetes namespace (<code>$LAGOON_PROJECT-$LAGOON_ENVIRONMENT</code>).</li>
+<li>Send the required fields<ul>
+<li><code>type</code>: the name of the Kubernetes namespace (<code>$LAGOON_PROJECT-$LAGOON_ENVIRONMENT</code>)</li>
+<li><code>host</code>: the name of the pod (<code>$HOSTNAME</code>)</li>
+<li><code>@timestamp</code>: the timestamp of the log</li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
-<p>To access the logs, please contact your Lagoon administrator to get the URL for the Kibana route.</p>
-<p>Each Lagoon user account has their own login and will see the logs only for the projects to which they have access.</p>
-<p>Each Lagoon user account also has their own <strong>Kibana Tenant</strong>, which means no saved searches or visualizations are shared with another account.</p>
-<p>If you would like to know more about how to use Kibana: <a href="https://www.elastic.co/webinars/getting-started-kibana">https://www.elastic.co/webinars/getting-started-kibana</a>.</p>
+</li>
+</ul>
 
 
   
@@ -4675,6 +4717,8 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -4702,7 +4746,7 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["content.action.edit", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.action.edit", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.4e0fa4ba.min.js"></script>

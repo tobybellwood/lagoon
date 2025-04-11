@@ -1152,6 +1152,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../concepts-advanced/storage-types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Storage Types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../concepts-advanced/environment-types/" class="md-nav__link">
         
   
@@ -3508,26 +3528,6 @@
 
               
             
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../logging/kibana-examples/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Kibanaの例
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -4533,6 +4533,46 @@
   
   <span class="md-ellipsis">
     Policy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/2.24.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.24.0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/2.23.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.23.0
   </span>
   
 
@@ -5578,7 +5618,7 @@
 <h2 id="backup-retention">バックアップの保持期間 ( #backup-retention }<a class="headerlink" href="#backup-retention" title="Permanent link">#</a></h2>
 <h3 id="backup-retentionproductionmonthly"><code>backup-retention.production.monthly</code><a class="headerlink" href="#backup-retentionproductionmonthly" title="Permanent link">#</a></h3>
 <p>プロジェクトのproduction環境の月次バックアップの保持数を指定します。</p>
-<p>この値が指定されていない場合、デフォルトは <code>1</code> です。</p>
+<p>この値が指定されていない場合、デフォルトは <code>0</code> です。</p>
 <h3 id="backup-retentionproductionweekly"><code>backup-retention.production.weekly</code><a class="headerlink" href="#backup-retentionproductionweekly" title="Permanent link">#</a></h3>
 <p>プロジェクトのproduction環境の週次バックアップの保持数を指定します。</p>
 <p>この値が指定されていない場合、デフォルトは <code>6</code> です。</p>
@@ -5591,7 +5631,11 @@
 <h2 id="backup-schedule">バックアップスケジュール<a class="headerlink" href="#backup-schedule" title="Permanent link">#</a></h2>
 <h3 id="backup-scheduleproduction"><code>backup-schedule.production</code><a class="headerlink" href="#backup-scheduleproduction" title="Permanent link">#</a></h3>
 <p>プロジェクトのバックアップスケジュールを指定します。ただし、<code>Minute</code> ブロックは <code>M</code> でなければならず、他の値は Lagoon ビルドに失敗します。これにより、Lagoonはこれらのバックアップを何分に行うかランダムに選択することができ、ユーザーはスケジュールの残りの部分を時間単位で指定できます。</p>
-<p>この値が指定されていない場合、グローバルデフォルトは <code>M H(22-2) * * *</code> です。注意して頂きたいのは、 これらのバックアップは、クラスタのローカルタイムゾーンを使用します。</p>
+<p>この値が指定されていない場合、グローバルデフォルトは <code>M H(22-2) * * *</code> です。</p>
+<div class="admonition info">
+<p class="admonition-title">タイムゾーン:</p>
+<p>バックアップ スケジュールでは、クラスターのローカル タイムゾーンが使用されます。</p>
+</div>
 <h2 id="environments">環境<a class="headerlink" href="#environments" title="Permanent link">#</a></h2>
 <p>環境名は、デプロイされたブランチ名やプルリクエスト名と一致します。これにより、各環境で異なる設定を持つことが可能になります。私たちの例では、<code>main</code>と<code>staging</code>環境に適用されます。</p>
 <h3 id="environmentsnameroutes"><code>environments.[name].routes</code><a class="headerlink" href="#environmentsnameroutes" title="Permanent link">#</a></h3>
@@ -6080,6 +6124,8 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -6107,7 +6153,7 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["content.action.edit", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["content.action.edit", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}}</script>
     
     
       <script src="../../../assets/javascripts/bundle.4e0fa4ba.min.js"></script>

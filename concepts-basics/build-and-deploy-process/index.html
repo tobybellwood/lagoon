@@ -878,6 +878,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../concepts-advanced/storage-types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Storage Types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../concepts-advanced/environment-types/" class="md-nav__link">
         
   
@@ -3234,26 +3254,6 @@
 
               
             
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../logging/kibana-examples/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Kibana Examples
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -4274,6 +4274,46 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/2.24.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.24.0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/2.23.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.23.0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/2.22.0/" class="md-nav__link">
         
   
@@ -4881,7 +4921,7 @@
 <iframe width="560" height="315" src="https://www.youtube.com/embed/XiaH7gqUXWc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 <h2 id="1-set-up-openshift-projectkubernetes-namespace-for-environment">1. Set up OpenShift Project/Kubernetes Namespace for Environment<a class="headerlink" href="#1-set-up-openshift-projectkubernetes-namespace-for-environment" title="Permanent link">#</a></h2>
-<p>First, Lagoon checks if the OpenShift project/Kubernetes namespace for the given environment exists and is correctly set up. It will make sure that we have the needed service accounts, create secrets, and will configure environment variables into a ConfigMap <code>lagoon-env</code> which is filled with information like the environment type and name, the Lagoon project name, and so on.</p>
+<p>First, Lagoon checks if the OpenShift project/Kubernetes namespace for the given environment exists and is correctly set up. It will make sure that we have the needed service accounts, create secrets, and will configure environment variables into a Secret named <code>lagoon-env</code> which is filled with information like the environment type and name, the Lagoon project name, and so on.</p>
 <h2 id="2-git-checkout-merge">2. Git Checkout &amp; Merge<a class="headerlink" href="#2-git-checkout-merge" title="Permanent link">#</a></h2>
 <p>Next, Lagoon will check out your code from Git. It needs that to be able to read the <code>.lagoon.yml</code>, <code>docker-compose.yml</code> and any <code>.env</code> files, but also to build the Docker images.</p>
 <p>Note that Lagoon will only process these actions if the branch/PR matches the branch regex set in Lagoon. Based on how the deployment has been triggered, different things will happen:</p>
@@ -4962,6 +5002,8 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -4989,7 +5031,7 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["content.action.edit", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.action.edit", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.4e0fa4ba.min.js"></script>

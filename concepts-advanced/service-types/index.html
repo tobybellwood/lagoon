@@ -16,7 +16,7 @@
         <link rel="prev" href="../">
       
       
-        <link rel="next" href="../environment-types/">
+        <link rel="next" href="../storage-types/">
       
       
       <link rel="icon" href="../../images/lagoon-icon.png">
@@ -753,6 +753,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#additional-volumes" class="md-nav__link">
+    Additional Volumes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-service-ports" class="md-nav__link">
+    Additional Service Ports
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#storage-types" class="md-nav__link">
+    Storage Types
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#basic" class="md-nav__link">
     basic
   </a>
@@ -762,6 +783,13 @@
         <li class="md-nav__item">
   <a href="#basic-persistent" class="md-nav__link">
     basic-persistent
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-single" class="md-nav__link">
+    basic-single
   </a>
   
 </li>
@@ -783,20 +811,6 @@
         <li class="md-nav__item">
   <a href="#elasticsearch" class="md-nav__link">
     elasticsearch
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#kibana" class="md-nav__link">
-    kibana
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#logstash" class="md-nav__link">
-    logstash
   </a>
   
 </li>
@@ -980,6 +994,26 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../storage-types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Storage Types
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -3347,26 +3381,6 @@
 
               
             
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../logging/kibana-examples/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Kibana Examples
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -4387,6 +4401,46 @@
   
   
     <li class="md-nav__item">
+      <a href="../../releases/2.24.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.24.0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/2.23.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.23.0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../releases/2.22.0/" class="md-nav__link">
         
   
@@ -4855,6 +4909,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#additional-volumes" class="md-nav__link">
+    Additional Volumes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-service-ports" class="md-nav__link">
+    Additional Service Ports
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#storage-types" class="md-nav__link">
+    Storage Types
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#basic" class="md-nav__link">
     basic
   </a>
@@ -4864,6 +4939,13 @@
         <li class="md-nav__item">
   <a href="#basic-persistent" class="md-nav__link">
     basic-persistent
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-single" class="md-nav__link">
+    basic-single
   </a>
   
 </li>
@@ -4885,20 +4967,6 @@
         <li class="md-nav__item">
   <a href="#elasticsearch" class="md-nav__link">
     elasticsearch
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#kibana" class="md-nav__link">
-    kibana
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#logstash" class="md-nav__link">
-    logstash
   </a>
   
 </li>
@@ -5103,11 +5171,19 @@
 
 <h1 id="service-types">Service Types<a class="headerlink" href="#service-types" title="Permanent link">#</a></h1>
 <p>The below lists all service types that can be defined via <code>lagoon.type</code> within a <a href="../../concepts-basics/docker-compose-yml/"><code>docker-compose.yml</code> file</a>.</p>
-<p>For more information on the <code>lagoon.volumes.X.path</code> label, please see <a href="../../concepts-basics/docker-compose-yml/#additional-volumes">Additional Volumes</a></p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Once a <code>lagoon.type</code> is defined and the environment is deployed, changing it to a different type is not supported and could result in a broken environment.</p>
 </div>
+<h2 id="additional-volumes">Additional Volumes<a class="headerlink" href="#additional-volumes" title="Permanent link">#</a></h2>
+<p>Some service types allow for additional volumes to be added, for more information on the <code>lagoon.volumes.X.path</code> label, please see <a href="../../concepts-basics/docker-compose-yml/#additional-volumes">Additional Volumes</a></p>
+<p>If a service type does not include the <code>lagoon.volumes.X.path</code> label in the <code>Docker compose labels</code> section, then it does not support additional volumes.</p>
+<p>If you're provisioning a new project, we recommend avoiding the usage of <code>-persistent</code> service types, and use additional volumes as required for any persistent data.</p>
+<h2 id="additional-service-ports">Additional Service Ports<a class="headerlink" href="#additional-service-ports" title="Permanent link">#</a></h2>
+<p>Most services provide a default port, in cases where you want to use the services already defined in your <code>docker-compose.yml</code> file, you can configure a service to use those ports instead.</p>
+<p>To use this feature, you set the <code>lagoon.service.usecomposeports: true</code> label on the service in your <code>docker-compose.yml</code> file. For more information on how to use this feature, see <a href="../../concepts-basics/docker-compose-yml/#additional-service-ports">Additional Service Ports</a></p>
+<h2 id="storage-types">Storage Types<a class="headerlink" href="#storage-types" title="Permanent link">#</a></h2>
+<p>See <a href="../storage-types/">storage types</a> for more information.</p>
 <h2 id="basic"><code>basic</code><a class="headerlink" href="#basic" title="Permanent link">#</a></h2>
 <p>Basic container, good to use for most applications that don't have an existing template. No persistent storage. The port can be changed using a label. If an <a href="../../concepts-basics/docker-compose-yml/#auto-generated-routes">autogenerated route</a> is not required (e.g. for an internal-facing service, set <code>lagoon.autogeneratedroute: false</code> in the docker-compose.yml)</p>
 <table>
@@ -5117,7 +5193,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5139,7 +5215,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5147,8 +5223,32 @@
 <td style="text-align: left;">TCP connection on <code>3000</code></td>
 <td style="text-align: left;"><code>3000</code></td>
 <td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><a href="../storage-types/#bulk">Bulk</a></td>
+<td style="text-align: left;"><code>lagoon.service.port</code>, <code>lagoon.autogeneratedroute</code>, <code>lagoon.persistent</code>, <code>lagoon.persistent.name</code>, <code>lagoon.persistent.size</code>,  <code>lagoon.volumes.X.path</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="basic-single"><code>basic-single</code><a class="headerlink" href="#basic-single" title="Permanent link">#</a></h2>
+<p>Like <code>basic-persistent</code>. This will also generate persistent storage, defines mount location via <code>lagoon.persistent</code>.</p>
+<p>Where this differs from <code>basic-persistent</code> is that the volume is a <code>ReadWriteOnce</code> volume type. The downsides to this service type are that it can't be scaled.</p>
+<p>This service type does not support additional volumes.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Healthcheck</th>
+<th style="text-align: left;">Exposed Ports</th>
+<th style="text-align: left;">Auto Generated Routes</th>
+<th style="text-align: left;">Storage</th>
+<th style="text-align: left;">Docker compose labels</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">TCP connection on <code>3000</code></td>
+<td style="text-align: left;"><code>3000</code></td>
 <td style="text-align: left;">Yes</td>
-<td style="text-align: left;"><code>lagoon.service.port</code>, <code>lagoon.autogeneratedroute</code>, <code>lagoon.persistent</code>, <code>lagoon.persistent.name</code>, <code>lagoon.persistent.size</code>, <code>lagoon.persistent.class</code> , <code>lagoon.volumes.X.path</code></td>
+<td style="text-align: left;"><a href="../storage-types/#block">Block</a></td>
+<td style="text-align: left;"><code>lagoon.service.port</code>, <code>lagoon.autogeneratedroute</code>, <code>lagoon.persistent</code>, <code>lagoon.persistent.name</code>, <code>lagoon.persistent.size</code></td>
 </tr>
 </tbody>
 </table>
@@ -5161,7 +5261,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5183,7 +5283,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5191,7 +5291,7 @@
 <td style="text-align: left;">-</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><a href="../storage-types/#bulk">Bulk</a></td>
 <td style="text-align: left;"><code>lagoon.persistent.name</code>, <code>lagoon.persistent</code>, <code>lagoon.volumes.X.path</code></td>
 </tr>
 </tbody>
@@ -5205,7 +5305,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5213,52 +5313,8 @@
 <td style="text-align: left;">HTTP on <code>localhost:9200/_cluster/health?local=true</code></td>
 <td style="text-align: left;">9200</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><a href="../storage-types/#block">Block</a></td>
 <td style="text-align: left;"><code>lagoon.persistent.size</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="kibana"><code>kibana</code><a class="headerlink" href="#kibana" title="Permanent link">#</a></h2>
-<p>Kibana container.</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Healthcheck</th>
-<th style="text-align: left;">Exposed Ports</th>
-<th style="text-align: left;">Auto Generated Routes</th>
-<th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">TCP connection on <code>5601</code></td>
-<td style="text-align: left;"><code>5601</code></td>
-<td style="text-align: left;">Yes</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">-</td>
-</tr>
-</tbody>
-</table>
-<h2 id="logstash"><code>logstash</code><a class="headerlink" href="#logstash" title="Permanent link">#</a></h2>
-<p>Logstash container.</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Healthcheck</th>
-<th style="text-align: left;">Exposed Ports</th>
-<th style="text-align: left;">Auto Generated Routes</th>
-<th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">TCP connection on <code>9600</code></td>
-<td style="text-align: left;"><code>9600</code></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">-</td>
 </tr>
 </tbody>
 </table>
@@ -5271,7 +5327,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5293,7 +5349,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5301,7 +5357,7 @@
 <td style="text-align: left;">TCP connection on <code>3306</code></td>
 <td style="text-align: left;"><code>3306</code></td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><a href="../storage-types/#block">Block</a></td>
 <td style="text-align: left;"><code>lagoon.persistent.size</code></td>
 </tr>
 </tbody>
@@ -5315,7 +5371,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5337,7 +5393,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5359,7 +5415,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5367,7 +5423,7 @@
 <td style="text-align: left;">TCP connection on <code>27017</code></td>
 <td style="text-align: left;"><code>27017</code></td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><a href="../storage-types/#block">Block</a></td>
 <td style="text-align: left;"><code>lagoon.persistent.size</code></td>
 </tr>
 </tbody>
@@ -5381,7 +5437,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5403,7 +5459,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5425,7 +5481,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5447,7 +5503,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5455,8 +5511,8 @@
 <td style="text-align: left;">NGINX: <code>localhost:50000/nginx_status</code>, PHP: <code>/usr/sbin/check_fcgi</code></td>
 <td style="text-align: left;">http on <code>8080</code></td>
 <td style="text-align: left;">Yes</td>
-<td style="text-align: left;">Yes</td>
-<td style="text-align: left;"><code>lagoon.autogeneratedroute</code>, <code>lagoon.persistent</code>, <code>lagoon.persistent.name</code>, <code>lagoon.persistent.size</code>, <code>lagoon.persistent.class</code>, <code>lagoon.volumes.X.path</code></td>
+<td style="text-align: left;"><a href="../storage-types/#bulk">Bulk</a></td>
+<td style="text-align: left;"><code>lagoon.autogeneratedroute</code>, <code>lagoon.persistent</code>, <code>lagoon.persistent.name</code>, <code>lagoon.persistent.size</code>, <code>lagoon.volumes.X.path</code></td>
 </tr>
 </tbody>
 </table>
@@ -5469,7 +5525,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5491,7 +5547,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5499,8 +5555,8 @@
 <td style="text-align: left;">TCP connection on <code>3000</code></td>
 <td style="text-align: left;"><code>3000</code></td>
 <td style="text-align: left;">Yes</td>
-<td style="text-align: left;">Yes</td>
-<td style="text-align: left;"><code>lagoon.autogeneratedroute</code>, <code>lagoon.persistent</code>, <code>lagoon.persistent.name</code>, <code>lagoon.persistent.size</code>, <code>lagoon.persistent.class</code>, <code>lagoon.volumes.X.path</code></td>
+<td style="text-align: left;"><a href="../storage-types/#bulk">Bulk</a></td>
+<td style="text-align: left;"><code>lagoon.autogeneratedroute</code>, <code>lagoon.persistent</code>, <code>lagoon.persistent.name</code>, <code>lagoon.persistent.size</code>, <code>lagoon.volumes.X.path</code></td>
 </tr>
 </tbody>
 </table>
@@ -5513,7 +5569,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5535,7 +5591,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5543,7 +5599,7 @@
 <td style="text-align: left;">HTTP on <code>localhost:9200/_cluster/health?local=true</code></td>
 <td style="text-align: left;">9200</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><a href="../storage-types/#block">Block</a></td>
 <td style="text-align: left;"><code>lagoon.persistent.size</code></td>
 </tr>
 </tbody>
@@ -5557,7 +5613,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5579,7 +5635,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5587,7 +5643,7 @@
 <td style="text-align: left;">TCP connection on <code>5432</code></td>
 <td style="text-align: left;"><code>5432</code></td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><a href="../storage-types/#block">Block</a></td>
 <td style="text-align: left;"><code>lagoon.persistent.size</code></td>
 </tr>
 </tbody>
@@ -5601,7 +5657,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5623,7 +5679,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5645,7 +5701,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5653,7 +5709,7 @@
 <td style="text-align: left;">HTTP connection on <code>8800</code></td>
 <td style="text-align: left;"><code>8800</code></td>
 <td style="text-align: left;">Yes</td>
-<td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><a href="../storage-types/#bulk">Bulk</a></td>
 <td style="text-align: left;"><code>lagoon.autogeneratedroute</code>, <code>lagoon.volumes.X.path</code></td>
 </tr>
 </tbody>
@@ -5667,7 +5723,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5689,7 +5745,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5697,7 +5753,7 @@
 <td style="text-align: left;">TCP connection on <code>6379</code></td>
 <td style="text-align: left;"><code>6379</code></td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><a href="../storage-types/#block">Block</a></td>
 <td style="text-align: left;"><code>lagoon.persistent.size</code></td>
 </tr>
 </tbody>
@@ -5711,7 +5767,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5719,7 +5775,7 @@
 <td style="text-align: left;">TCP connection on <code>8983</code></td>
 <td style="text-align: left;"><code>8983</code></td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><a href="../storage-types/#block">Block</a></td>
 <td style="text-align: left;"><code>lagoon.persistent.size</code></td>
 </tr>
 </tbody>
@@ -5733,7 +5789,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5755,7 +5811,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5763,7 +5819,7 @@
 <td style="text-align: left;">HTTP request <code>localhost:8080/varnish_status</code></td>
 <td style="text-align: left;"><code>8080</code></td>
 <td style="text-align: left;">Yes</td>
-<td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><a href="../storage-types/#block">Block</a></td>
 <td style="text-align: left;"><code>lagoon.autogeneratedroute</code>, <code>lagoon.persistent.size</code></td>
 </tr>
 </tbody>
@@ -5777,7 +5833,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5799,7 +5855,7 @@
 <th style="text-align: left;">Exposed Ports</th>
 <th style="text-align: left;">Auto Generated Routes</th>
 <th style="text-align: left;">Storage</th>
-<th style="text-align: left;">Additional customization parameter</th>
+<th style="text-align: left;">Docker compose labels</th>
 </tr>
 </thead>
 <tbody>
@@ -5807,7 +5863,7 @@
 <td style="text-align: left;">-</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><a href="../storage-types/#bulk">Bulk</a></td>
 <td style="text-align: left;"><code>lagoon.persistent.name</code>, <code>lagoon.persistent</code>, <code>lagoon.volumes.X.path</code></td>
 </tr>
 </tbody>
@@ -5824,6 +5880,8 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
         </div>
         
       </main>
@@ -5851,7 +5909,7 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["content.action.edit", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.action.edit", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.4e0fa4ba.min.js"></script>
